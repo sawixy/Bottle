@@ -1,4 +1,4 @@
-# Bottle - simple game engine
+# Bottle - simple game engine written on C++
 
 ## Bottle features:
  - Vulkan renderer
@@ -13,5 +13,3 @@
 
 ## Current status:
 ⚠️ Early prototype, not functional
-
-## Written in C++
