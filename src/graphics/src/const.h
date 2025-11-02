@@ -1,0 +1,4 @@
+#define WIDTH 800
+#define HEIGHT 600
+
+#define MAX_FRAMES_IN_FLIGHT 3
