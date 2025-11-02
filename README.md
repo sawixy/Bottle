@@ -2,9 +2,9 @@
 
 ## Bottle features:
  - Vulkan renderer
- - ECS architecture
+ - ECS architecture (but CPB)
 
-## ECS Systems
+## CPB Systems
  - Graphics
  - Event
  - Animation (planned)
@@ -13,3 +13,8 @@
 
 ## Current status:
 ⚠️ Early prototype, not functional
+
+## The funniest thing in this project
+### ECS (Entity, Component, System) is CPB (Creature, Part, Behaviour)
+
+# KAHBOOM!!

@@ -8,7 +8,7 @@
 
 using EventTrigger = std::string;
 
-class EventSystem {
+class EventBehaviour {
 private:
 	std::unordered_map<EventTrigger, Event> events{};
 public:

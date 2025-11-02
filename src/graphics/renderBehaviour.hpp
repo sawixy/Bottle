@@ -8,22 +8,22 @@
 #include <tuple>
 #include <unordered_map>
 
-class RenderComponent {
+class RenderPart {
 private:
     Render* _render;
     PipelineCreate* pipelineCreate;
     std::vector<Shader> shaders;
 
 public:
-    RenderComponent(Render* render);
-    ~RenderComponent();
+    RenderPart(Render* render);
+    ~RenderPart();
 };
 
-class RenderSystem : public System<RenderComponent> {
+class RenderBehaviour : public System<RenderPart> {
 private:
-    std::vector<RenderComponent*> components;
+    std::vector<RenderPart*> components;
 public:
     void init();
     void update();
-    void add(RenderComponent* component);
+    void add(RenderPart* component);
 };

@@ -1,6 +1,6 @@
 #include "eventsystem.hpp"
 
-Event EventSystem::register_event(EventTrigger trigger) {
+Event EventBehaviour::register_event(EventTrigger trigger) {
     Event event{};
     events[trigger] = event;
 
