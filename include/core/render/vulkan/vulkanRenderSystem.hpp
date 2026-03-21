@@ -7,6 +7,13 @@ namespace bottle::core::render::vulkan {
 class VulkanRenderSystem : public RenderSystem {
 private:
     VulkanRenderer renderer;
+
+public:
+    VulkanRenderSystem() {}
+
+    void update() override;
+
+    ~VulkanRenderSystem() override;
 };
 
 }
