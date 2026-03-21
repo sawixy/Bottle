@@ -15,7 +15,6 @@ void QueueManager::createQueues() {
         }
         if (families_props[i].queueFlags & vk::QueueFlags::BitsType::eTransfer) {
             indices.transfer = i;
-
             for (int j = 0; j < families_props[i].queueCount; j++) {
                 transfer.push_back(ctx.getDevice().getQueue(i, j));
             }
