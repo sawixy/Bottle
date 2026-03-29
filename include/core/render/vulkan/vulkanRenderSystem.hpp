@@ -11,6 +11,7 @@ private:
 public:
     VulkanRenderSystem() {}
 
+    VulkanRenderer& getRenderer() { return renderer; };
     void update() override;
 
     ~VulkanRenderSystem() override;

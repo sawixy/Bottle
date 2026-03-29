@@ -15,4 +15,8 @@ vk::SurfaceKHR GLFWWindowSystem::vulkanInit(VkInstance instance) {
     return vk::SurfaceKHR(_surface);
 }
 
+void GLFWWindowSystem::update() {
+    glfwPollEvents();
+}
+
 }

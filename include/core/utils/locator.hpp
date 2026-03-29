@@ -15,9 +15,8 @@ private:
     std::unordered_map<std::type_index, System*> systems;
     std::unordered_map<std::string, Entity> entities;
 
-    Locator() = default;
-
 public:
+    Locator() = default;
 
     /* System add, get, remove */
     template<typename T>
@@ -30,7 +29,7 @@ public:
         if (systems.find(std::type_index(typeid(T))) == systems.end())
             throw std::runtime_error("System not found");
 
-        return systems[std::type_index(typeid(T))];
+        return dynamic_cast<T*>(systems[std::type_index(typeid(T))]);
     }
 
     template<typename T>
