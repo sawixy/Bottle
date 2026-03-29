@@ -13,7 +13,7 @@ const std::vector<const char*> layers{
 
 /* Exstensions */
 const std::vector<const char*> extensions {
-    "VK_KHR_surface"
+    vk::KHRSurfaceExtensionName
 };
 
 class Context {
@@ -44,8 +44,8 @@ public:
 
     /* Getters */
     const vk::raii::Instance& getInstance() const { return instance; }
-    const vk::raii::PhysicalDevice& getPhysicalDevice() { return physDevice; }
-    const vk::raii::Device& getDevice() { return device; }
+    const vk::raii::PhysicalDevice& getPhysicalDevice() const { return physDevice; }
+    const vk::raii::Device& getDevice() const { return device; }
 };
 
 }
