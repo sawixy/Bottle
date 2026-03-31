@@ -9,7 +9,8 @@ namespace bottle::core::resources::render {
 struct ShaderCode {
     std::variant<vk::raii::ShaderModule, std::string> code;
 
-    ShaderCode();
+    ShaderCode(vk::raii::ShaderModule module) : code(std::move(module)) {}
+    ShaderCode(std::string code) : code(code) {}
 };
 
 class ShaderResource {
