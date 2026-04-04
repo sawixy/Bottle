@@ -2,6 +2,7 @@
 
 #include <core/utils/ecs/system.hpp>
 #include <vector>
+#include <stdint.h>
 
 namespace bottle::core::render {
 
@@ -14,7 +15,7 @@ public:
 class Mesh {
 public:
     std::vector<Vertex> vertices;
-    std::vector<int> indices;
+    std::vector<uint32_t> indices;
 };
 
 class RenderSystem: public utils::System {

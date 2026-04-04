@@ -13,7 +13,8 @@ const std::vector<const char*> layers{
 
 /* Exstensions */
 const std::vector<const char*> extensions {
-    vk::KHRSurfaceExtensionName
+    vk::KHRSurfaceExtensionName,
+    vk::KHRSwapchainExtensionName
 };
 
 class Context {

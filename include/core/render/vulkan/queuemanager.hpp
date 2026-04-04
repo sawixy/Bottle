@@ -33,6 +33,15 @@ public:
         COMPUTE
     };
 
+    uint32_t getFamilyIndex(QueueType type) {
+        switch (type) {
+            case QueueType::GRAPHICS: return indices.graphics;
+            case QueueType::TRANSFER: return indices.transfer;
+            case QueueType::COMPUTE:  return indices.compute;
+        }
+        return -1;
+    } 
+
     vk::raii::Queue& getQueue(QueueType type, uint32_t index) {
         switch (type) {
             case QueueType::GRAPHICS: return graphics[(index < graphics.size() ? index : throw std::runtime_error("Out of boundaries"))];
