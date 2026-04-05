@@ -90,7 +90,7 @@ void VulkanRenderComponent::loadBuffers() {
     };
 
     void* idata = ctx.getDevice().mapMemory2(vmemMapI);
-    memcpy(idata, mesh.vertices.data(), mesh.vertices.size()*sizeof(Vertex));
+    memcpy(idata, mesh.vertices.data(), mesh.vertices.size()*sizeof(uint32_t));
 }
 
 }
