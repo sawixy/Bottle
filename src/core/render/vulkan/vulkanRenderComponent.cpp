@@ -3,6 +3,7 @@
 #include "core/render/vulkan/queuemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
+#include <cstring>
 #include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/vulkanRenderSystem.hpp>
 
@@ -68,6 +69,28 @@ void VulkanRenderComponent::initBuffers() {
 
 void VulkanRenderComponent::loadBuffers() {
     Context& ctx = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
+
+    vk::MemoryMapInfo vmemMapI {
+        {},
+        verticesMemory,
+        {},
+        mesh.vertices.size() * sizeof(Vertex),
+        nullptr
+    };
+
+    void* vdata = ctx.getDevice().mapMemory2(vmemMapI);
+    memcpy(vdata, mesh.vertices.data(), mesh.vertices.size()*sizeof(Vertex));
+
+    vk::MemoryMapInfo imemMapI {
+        {},
+        indicesMemory,
+        {},
+        mesh.indices.size() * sizeof(uint32_t),
+        nullptr
+    };
+
+    void* idata = ctx.getDevice().mapMemory2(vmemMapI);
+    memcpy(idata, mesh.vertices.data(), mesh.vertices.size()*sizeof(Vertex));
 }
 
 }
