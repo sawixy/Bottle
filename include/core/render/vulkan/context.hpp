@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_raii.hpp>
 #include <vector>
 
@@ -12,9 +13,13 @@ const std::vector<const char*> layers{
 };
 
 /* Exstensions */
-const std::vector<const char*> extensions {
-    vk::KHRSurfaceExtensionName,
-    vk::KHRSwapchainExtensionName
+const std::vector<const char*> InstanceExtensions {
+    "VK_KHR_surface",
+    "VK_KHR_wayland_surface"
+};
+
+const std::vector<const char*> DeviceExtensions {
+    "VK_KHR_swapchain"
 };
 
 class Context {

@@ -17,6 +17,8 @@ public:
     vk::SurfaceKHR vulkanInit(VkInstance instance) override;
 
     void update() override;
+
+    ~GLFWWindowSystem();
 };
 
 }

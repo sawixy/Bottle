@@ -1,25 +1,32 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.20)
+project(Bottle)
 
-project(bottle)
-
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(SOURCE 
-    src/core/window/glfw/glfwWindowSystem.cpp
-    src/core/resources/render/vulkan/VulkanShaderResource.cpp
-    src/core/render/vulkan/queuemanager.cpp
-    src/core/render/vulkan/context/devices.cpp
-    src/core/render/vulkan/context/instance.cpp
-    src/main.cpp
+find_package(Vulkan REQUIRED)
+find_package(glfw3 REQUIRED)
+
+file(GLOB_RECURSE SOURCES 
+    "src/*.cpp"
 )
 
-find_package(glfw3)
+add_executable(bottle ${SOURCES})
 
-target_link_libraries(
+target_include_directories(bottle PRIVATE include)
+
+target_compile_definitions(bottle PRIVATE 
+    VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
+    DEBUG=1
+)
+
+target_link_libraries(bottle 
+    Vulkan::Vulkan
     glfw
+    dl
+    pthread
 )
 
-include_directories(include)
-
-add_executable(${PROJECT_NAME} ${SOURCE})
+if(NOT Vulkan_FOUND)
+    message(FATAL_ERROR "Vulkan not found!")
+endif()

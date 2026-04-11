@@ -14,18 +14,32 @@ struct ShaderCode {
 };
 
 class ShaderResource {
+public:
+    enum class ShaderType {
+        COMPUTE,
+        VERTEX,
+        FRAGMENT
+    };
+
 protected:
-    bool isLoaded;
+    bool isLoaded = false;
     std::string path;
+    ShaderType type = ShaderType::VERTEX;
+    std::string name;
 
 public:
-    virtual void load(std::string path) = 0;
+    ShaderResource(std::string name, std::string path, ShaderType type)
+        : isLoaded(false), path(std::move(path)), type(type), name(std::move(name)) {}
+
+    virtual void load() = 0;
     virtual void unload() = 0;
-    virtual bool loaded() { return isLoaded; }
+    virtual bool loaded() const { return isLoaded; }
     virtual bool empty() = 0;
 
     virtual ShaderCode getCode() = 0;
-    const std::string getPath() const { return path; }
+    const std::string& getPath() const { return path; }
+    ShaderType getType() const { return type; }
+    const std::string& getName() const { return name; }
 };
 
 }

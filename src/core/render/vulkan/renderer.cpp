@@ -9,6 +9,8 @@
 #include <core/render/vulkan/renderer.hpp>
 #include <vector>
 
+#include <iostream>
+
 namespace bottle::core::render::vulkan {
 
 void VulkanRenderer::initSwapchain() {
@@ -16,7 +18,12 @@ void VulkanRenderer::initSwapchain() {
     vk::SurfaceCapabilitiesKHR surfaceCaps = ctx.getPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
     std::vector<vk::SurfaceFormatKHR> formats = ctx.getPhysicalDevice().getSurfaceFormatsKHR(surface);
     std::vector<vk::PresentModeKHR> modes = ctx.getPhysicalDevice().getSurfacePresentModesKHR(surface);
-    int imageCount = std::clamp<uint32_t>(FRAMES_IN_FLIGHT, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
+    int imageCount = FRAMES_IN_FLIGHT;
+    if (surfaceCaps.maxImageCount != 0) {
+        imageCount = std::clamp<uint32_t>(FRAMES_IN_FLIGHT, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
+    }
+
+    rect = vk::Extent2D{800, 800}; // TODO: Remove hardcoded numbers
 
     // present mode
     for (auto mode : modes) {
@@ -63,6 +70,8 @@ void VulkanRenderer::initSwapchain() {
     };
 
     swapchain = std::move(ctx.getDevice().createSwapchainKHR(swapchainCI));
+
+    std::cout << "Swapchain initialized successfully" << std::endl;
 }
 
 void VulkanRenderer::createImages() {
@@ -114,7 +123,7 @@ void VulkanRenderer::initCommandBuffers() {
     cmds = std::move(ctx.getDevice().allocateCommandBuffers(cmdallocCI));
 }
 
-void VulkanRenderer::render(std::vector<VulkanRenderComponent> components) {
+void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& components) {
     for (int i = 0; i < FRAMES_IN_FLIGHT; i++) { // FIXME: FRAMES_IN_FLIGHT might be not actual imageCount. PS. Sorry for my English
         if (ctx.getDevice().waitForFences(*fences[i], vk::True, 1000) != vk::Result::eSuccess) {
             throw std::runtime_error("Yo! Im crashed lol)");
@@ -124,7 +133,7 @@ void VulkanRenderer::render(std::vector<VulkanRenderComponent> components) {
         auto [result, img] = swapchain.acquireNextImage(100000, renderReady[i], fences[i]);
 
         // Let`s begin DYNAMIC RENDERING BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOM
-        vk::Rect2D render_area = vk::Rect2D{0.0, rect};
+        vk::Rect2D render_area = vk::Rect2D{0, rect};
 
         vk::ClearValue colorClearValue = vk::ClearColorValue{std::array<float, 4>{0.01, 0.01, 0.01, 0.5}};
         vk::ClearValue depthStencilClearValue = vk::ClearDepthStencilValue{1.0 , 1};

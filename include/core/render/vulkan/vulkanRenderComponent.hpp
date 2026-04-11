@@ -6,11 +6,9 @@
 
 namespace bottle::core::render::vulkan {
 
-class VulkanRenderComponent {
+class VulkanRenderComponent : public RenderComponent {
 private:
     vk::raii::Pipeline pipeline;
-    std::vector<vk::raii::ShaderModule> shaders;
-    Mesh mesh;
     vk::raii::Buffer vertices{nullptr};
     vk::raii::DeviceMemory verticesMemory{nullptr};
     vk::raii::Buffer indices{nullptr};
@@ -20,10 +18,17 @@ private:
     void initBuffers();
 
 public:
-    VulkanRenderComponent(vk::raii::Pipeline pipeline,std::vector<vk::raii::ShaderModule> shaders, Mesh mesh) : pipeline(std::move(pipeline)), shaders(std::move(shaders)), mesh(mesh) {}
+    VulkanRenderComponent(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<resources::render::ShaderResource*> shaders)
+        : RenderComponent(std::move(mesh), std::move(shaders)), pipeline(std::move(pipeline)) {
+        initBuffers();
+        loadBuffers();
+    }
 
     vk::raii::Pipeline& getPipeline() { return pipeline; }
-    Mesh getMesh() { return mesh; }
+    const Mesh& getMesh() const { return RenderComponent::getMesh(); }
+    Mesh& getMesh() { return RenderComponent::getMesh(); }
+    const std::vector<resources::render::ShaderResource*>& getShaders() const { return RenderComponent::getShaders(); }
+    std::vector<resources::render::ShaderResource*>& getShaders() { return RenderComponent::getShaders(); }
     vk::raii::Buffer& getVertexBuffer() { return vertices; }
     vk::raii::Buffer& getIndexBuffer() { return indices; }
 };

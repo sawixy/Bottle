@@ -10,48 +10,54 @@
 
 namespace bottle::core::resources::render::vulkan {
     
-std::vector<char> readFile(std::string path) {
-    std::ifstream in(path, std::ios::ate);
-    size_t size = in.tellg();
-    in.seekg(std::ios::beg);
+std::vector<char> readFile(const std::string& path) {
+    std::ifstream in(path, std::ios::ate | std::ios::binary);
+    if (!in) {
+        throw std::runtime_error("Failed to open shader file: " + path);
+    }
+
+    size_t size = static_cast<size_t>(in.tellg());
+    in.seekg(0);
     std::vector<char> buf(size);
     in.read(buf.data(), size);
     in.close();
     return buf;
 }
 
-// TODO: make autocompile shaders
-void VulkanShaderResource::load(std::string path) {
-    this->path = path;
-    std::vector<char> code = readFile(path);
-    isLoaded = true;
+void VulkanShaderResource::load() {
+    auto bytes = readFile(path);
+    size_t uintCount = bytes.size() / sizeof(uint32_t);
+    code.resize(uintCount);
+    std::memcpy(code.data(), bytes.data(), uintCount * sizeof(uint32_t));
+    isLoaded = !code.empty();
 }
 
 void VulkanShaderResource::unload() {
-    module.clear();
     code.clear();
     isLoaded = false;
 }
 
 ShaderCode VulkanShaderResource::getCode() {
+    if (!loaded()) {
+        throw std::runtime_error("Shader resource not loaded: " + getPath());
+    }
+
     const vk::raii::Device& dev = dynamic_cast<core::render::vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<core::render::RenderSystem>())->getRenderer().getContext().getDevice();
 
     vk::ShaderModuleCreateInfo shaderModuleCI {
         {},
         code.size(),
-        reinterpret_cast<uint32_t*>(code.data()),
+        code.data(),
         nullptr
     };
 
-    vk::raii::ShaderModule mod {
+    vk::raii::ShaderModule module {
         dev,
         shaderModuleCI,
         nullptr
     };
 
-    ShaderCode code {std::move(mod)};
-
-    return std::move(code);
+    return ShaderCode{std::move(module)};
 }
 
 }

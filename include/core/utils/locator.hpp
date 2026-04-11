@@ -25,6 +25,11 @@ public:
     }
 
     template<typename T>
+    void add(T* system) {
+        systems[std::type_index(typeid(T))] = system;
+    }
+
+    template<typename T>
     T* get() {
         if (systems.find(std::type_index(typeid(T))) == systems.end())
             throw std::runtime_error("System not found");

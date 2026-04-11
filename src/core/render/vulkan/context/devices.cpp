@@ -66,8 +66,8 @@ void Context::createLogicalDevice(vk::raii::Device& device) {
         queuesCI.data(),
         static_cast<uint32_t>(layers.size()),
         layers.data(),
-        static_cast<uint32_t>(extensions.size()),
-        extensions.data(),   // TODO: Make support check
+        static_cast<uint32_t>(DeviceExtensions.size()),
+        DeviceExtensions.data(),   // TODO: Make support check
         &physicalDeviceFeatures
     };
 

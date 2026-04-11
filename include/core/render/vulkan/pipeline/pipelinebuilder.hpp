@@ -8,11 +8,6 @@
 #include <vulkan/vulkan_raii.hpp>
 namespace bottle::core::render::vulkan {
 
-struct PipelineWithShaders {
-    vk::Pipeline pipeline;
-    std::vector<vk::raii::ShaderModule> shaders;
-};
-
 class PipelineBuilder {
 private:
     std::vector<resources::render::ShaderResource*> shaders; // ShaderResource must be alive while creating Pipeline
@@ -76,6 +71,9 @@ public:
         multisamplingCI.setAlphaToOneEnable(vk::False);
         multisamplingCI.setMinSampleShading(1.0);
 
+        dynamicCI.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
+        dynamicCI.setPDynamicStates(dynamicStates.data());
+
         colorBlendCI.setAttachmentCount(attachments.size());
         colorBlendCI.setPAttachments(attachments.data());
         colorBlendCI.setBlendConstants(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 });
@@ -89,7 +87,7 @@ public:
     PipelineBuilder& setPolygonMode(vk::PolygonMode polygonMode) { rasterizationCI.setPolygonMode(polygonMode); return *this; }
     PipelineBuilder& setSampleCount(vk::SampleCountFlagBits sampleCount) { multisamplingCI.setRasterizationSamples(sampleCount); return *this; }
     PipelineBuilder& addColorBlendAttachment(vk::PipelineColorBlendAttachmentState attachment) { attachments.push_back(attachment); colorBlendCI.setAttachmentCount(attachments.size()); return *this; }
-    PipelineWithShaders build();
+    vk::raii::Pipeline build();
 };
 
 }

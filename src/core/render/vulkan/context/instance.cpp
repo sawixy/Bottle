@@ -2,6 +2,8 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include <iostream>
+
 namespace bottle::core::render::vulkan {
 
 void Context::initInstance(vk::raii::Instance& instance) {
@@ -10,7 +12,7 @@ void Context::initInstance(vk::raii::Instance& instance) {
         VK_MAKE_VERSION(0, 0, 1), // Application version from config
         "Bottle",
         VK_MAKE_VERSION(0, 0, 1), // TODO: Engine version from CMake
-        vk::ApiVersion14,
+        vk::ApiVersion13,
     };
 
     // TODO: Make checking extensions and layers support
@@ -20,15 +22,13 @@ void Context::initInstance(vk::raii::Instance& instance) {
         &appinfo,
         static_cast<uint32_t>(layers.size()),
         layers.data(),
-        static_cast<uint32_t>(extensions.size()),
-        extensions.data()
+        static_cast<uint32_t>(InstanceExtensions.size()),
+        InstanceExtensions.data()
     };
 
     instance = vk::raii::Instance(ctx, instanceCI);
 
-#ifdef DEBUG
     std::cout << "Instance initializated successfully" << std::endl;
-#endif
 }
 
 }

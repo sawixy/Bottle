@@ -35,6 +35,7 @@ private:
 
 public:
     VulkanRenderer() {
+        queueManager.createQueues();
         initSwapchain();
         createImages();
     }
@@ -46,7 +47,7 @@ public:
     Context& getContext() { return ctx; }
     QueueManager getQueueManager() { return queueManager; }
 
-    void render(std::vector<VulkanRenderComponent> components);
+    void render(const std::vector<VulkanRenderComponent*>& components);
 };
 
 }
