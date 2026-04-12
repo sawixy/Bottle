@@ -1,8 +1,11 @@
 #include "vulkan/vulkan.hpp"
+#include <algorithm>
+#include <cstring>
 #include <stdexcept>
-#include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/context.hpp>
 #include <vulkan/vulkan_raii.hpp>
+
+#define DEBUG
 
 #ifdef DEBUG
 #include <iostream>
@@ -35,9 +38,7 @@ void Context::pickPhysicalDevice(vk::raii::PhysicalDevice& physDevice) {
 #endif
     }
 
-#ifdef DEBUG
     std::cout << "Physical device initialized" << std::endl;
-#endif
 }
 
 void Context::createLogicalDevice(vk::raii::Device& device) {
@@ -46,19 +47,56 @@ void Context::createLogicalDevice(vk::raii::Device& device) {
 
     std::vector<vk::DeviceQueueCreateInfo> queuesCI{};
 
-    float priority = 1.0f;
+    float* priorities = new float[families_props.size()];
+
+    for (int i = 0; i < families_props.size(); i++) {
+        priorities[i] = 1.0f;
+    }
 
     for (int i = 0; i < families_props.size(); i++) {
         vk::DeviceQueueCreateInfo queueCI {
             {},
             static_cast<uint32_t>(i),
             families_props[i].queueCount,
-            &priority
+            priorities,
+            nullptr
         };
         queuesCI.push_back(queueCI);
     }
 
     vk::PhysicalDeviceFeatures physicalDeviceFeatures = physDevice.getFeatures();
+
+    vk::PhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures {
+        vk::True,
+        nullptr
+    };
+
+    auto availableExtensions = physDevice.enumerateDeviceExtensionProperties();
+    std::vector<const char*> enabledExtensions;
+    enabledExtensions.reserve(DeviceExtensions.size());
+
+    for (auto ext : DeviceExtensions) {
+        bool supported = false;
+        for (const auto& available : availableExtensions) {
+            if (std::strcmp(available.extensionName, ext) == 0) {
+                supported = true;
+                break;
+            }
+        }
+
+        if (supported) {
+            enabledExtensions.push_back(ext);
+        }
+#ifdef DEBUG
+        else {
+            std::cout << "Device extension not supported: " << ext << std::endl;
+        }
+#endif
+    }
+
+    if (std::find(enabledExtensions.begin(), enabledExtensions.end(), "VK_KHR_swapchain") == enabledExtensions.end()) {
+        throw std::runtime_error("Required device extension VK_KHR_swapchain is not supported");
+    }
 
     vk::DeviceCreateInfo deviceCI {
         {},
@@ -66,9 +104,10 @@ void Context::createLogicalDevice(vk::raii::Device& device) {
         queuesCI.data(),
         static_cast<uint32_t>(layers.size()),
         layers.data(),
-        static_cast<uint32_t>(DeviceExtensions.size()),
-        DeviceExtensions.data(),   // TODO: Make support check
-        &physicalDeviceFeatures
+        static_cast<uint32_t>(enabledExtensions.size()),
+        enabledExtensions.data(),
+        &physicalDeviceFeatures,
+        &dynamicRenderingFeatures
     };
 
     device = std::move(physDevice.createDevice(deviceCI));
