@@ -38,6 +38,12 @@ public:
         queueManager.createQueues();
         initSwapchain();
         createImages();
+
+        for (int i = 0; i < FRAMES_IN_FLIGHT; i++) {
+            renderReady.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
+            presentReady.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
+            fences.push_back(vk::raii::Fence(ctx.getDevice(), vk::FenceCreateInfo {vk::FenceCreateFlagBits::eSignaled}));
+        }
     }
 
     void initSwapchain();
