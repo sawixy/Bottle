@@ -10,6 +10,9 @@ namespace bottle::core::render::vulkan {
 
 class PipelineBuilder {
 private:
+    vk::raii::Pipeline pipeline{nullptr};
+    std::vector<vk::raii::ShaderModule> modules;
+
     std::vector<resources::render::ShaderResource*> shaders; // ShaderResource must be alive while creating Pipeline
     vk::PipelineShaderStageCreateInfo pipelineShaderCI;
     vk::PipelineVertexInputStateCreateInfo vertexInputCI;
@@ -87,7 +90,9 @@ public:
     PipelineBuilder& setPolygonMode(vk::PolygonMode polygonMode) { rasterizationCI.setPolygonMode(polygonMode); return *this; }
     PipelineBuilder& setSampleCount(vk::SampleCountFlagBits sampleCount) { multisamplingCI.setRasterizationSamples(sampleCount); return *this; }
     PipelineBuilder& addColorBlendAttachment(vk::PipelineColorBlendAttachmentState attachment) { attachments.push_back(attachment); colorBlendCI.setAttachmentCount(attachments.size()); return *this; }
-    vk::raii::Pipeline build();
+    void build();
+    vk::raii::Pipeline& getPipeline() { return pipeline; }
+    std::vector<vk::raii::ShaderModule>& getModules() { return modules; }
 };
 
 }
