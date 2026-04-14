@@ -14,13 +14,14 @@
 namespace bottle::core::render::vulkan {
 
 void VulkanRenderer::initSwapchain() {
+    std::cout << "Swapchain initialization started" << std::endl;
     surface = utils::Locator::Instance().get<window::WindowSystem>()->vulkanInit(*ctx.getInstance());
     vk::SurfaceCapabilitiesKHR surfaceCaps = ctx.getPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
     std::vector<vk::SurfaceFormatKHR> formats = ctx.getPhysicalDevice().getSurfaceFormatsKHR(surface);
     std::vector<vk::PresentModeKHR> modes = ctx.getPhysicalDevice().getSurfacePresentModesKHR(surface);
-    int imageCount = FRAMES_IN_FLIGHT;
+    int imageCount = 3;  // Surface requires minimum 3 images
     if (surfaceCaps.maxImageCount != 0) {
-        imageCount = std::clamp<uint32_t>(FRAMES_IN_FLIGHT, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
+        imageCount = std::clamp<uint32_t>(3, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
     }
 
     rect = vk::Extent2D{800, 800}; // TODO: Remove hardcoded numbers
@@ -34,11 +35,27 @@ void VulkanRenderer::initSwapchain() {
     }
 
     // format
+    bool foundPreferred = false;
     for (auto fmt : formats) {
-        format = fmt;
-        if (fmt.format == vk::Format::eA8B8G8R8SrgbPack32){
+        if (fmt.format == vk::Format::eA8B8G8R8SrgbPack32 && fmt.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+            format = fmt;
+            foundPreferred = true;
             break;
         }
+    }
+
+    if (!foundPreferred) {
+        for (auto fmt : formats) {
+            if (fmt.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+                format = fmt;
+                foundPreferred = true;
+                break;
+            }
+        }
+    }
+
+    if (!foundPreferred) {
+        format = formats[0];
     }
 
     std::vector<uint32_t> queuesIndices = {
@@ -106,7 +123,7 @@ void VulkanRenderer::createImages() {
 
 void VulkanRenderer::initCommandBuffers() {
     vk::CommandPoolCreateInfo poolCI {
-        {},
+        vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
         queueManager.getFamilyIndex(QueueManager::QueueType::GRAPHICS),
         nullptr
     };
@@ -116,7 +133,7 @@ void VulkanRenderer::initCommandBuffers() {
     vk::CommandBufferAllocateInfo cmdallocCI {
         graphicsPool,
         vk::CommandBufferLevel::ePrimary,
-        FRAMES_IN_FLIGHT,
+        framesInFlight,
         nullptr
     };
 
@@ -124,114 +141,148 @@ void VulkanRenderer::initCommandBuffers() {
 }
 
 void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& components) {
-    for (int i = 0; i < FRAMES_IN_FLIGHT; i++) { // FIXME: FRAMES_IN_FLIGHT might be not actual imageCount. PS. Sorry for my English
-        if (ctx.getDevice().waitForFences(*fences[i], vk::True, 1000) != vk::Result::eSuccess) {
-            throw std::runtime_error("Yo! Im crashed lol)");
-        }
-        ctx.getDevice().resetFences(*fences[i]);
+    static uint32_t i = 0;
 
-        auto [result, img] = swapchain.acquireNextImage(100000, renderReady[i], fences[i]);
-
-        // Let`s begin DYNAMIC RENDERING BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOM
-        vk::Rect2D render_area = vk::Rect2D{0, rect};
-
-        vk::ClearValue colorClearValue = vk::ClearColorValue{std::array<float, 4>{0.01, 0.01, 0.01, 0.5}};
-        vk::ClearValue depthStencilClearValue = vk::ClearDepthStencilValue{1.0 , 1};
-
-        // attachments
-        vk::RenderingAttachmentInfoKHR color {
-            imageViews[i],
-            vk::ImageLayout::eUndefined,
-            vk::ResolveModeFlagBits::eAverage,
-            imageViews[i],
-            vk::ImageLayout::eColorAttachmentOptimal,
-            vk::AttachmentLoadOp::eClear,
-            vk::AttachmentStoreOp::eStore,
-            colorClearValue,
-            nullptr
-        };
-
-        vk::RenderingAttachmentInfoKHR depth {
-            imageViews[i],
-            vk::ImageLayout::eColorAttachmentOptimal,
-            vk::ResolveModeFlagBits::eNone,
-            nullptr,
-            vk::ImageLayout::eUndefined,
-            vk::AttachmentLoadOp::eClear,
-            vk::AttachmentStoreOp::eDontCare,
-            depthStencilClearValue,
-            nullptr
-        };
-
-        vk::RenderingAttachmentInfoKHR stencil {
-            imageViews[i],
-            vk::ImageLayout::eColorAttachmentOptimal,
-            vk::ResolveModeFlagBits::eNone,
-            nullptr,
-            vk::ImageLayout::eUndefined,
-            vk::AttachmentLoadOp::eClear,
-            vk::AttachmentStoreOp::eDontCare,
-            depthStencilClearValue,
-            nullptr
-        };
-
-        vk::RenderingInfoKHR rendering {
-            {},
-            vk::Rect2D{{}, rect},
-            1,
-            1,
-            1,
-            &color,
-            &depth,
-            &stencil,
-            nullptr
-        };
-
-        vk::CommandBuffer cmd = cmds[i];
-        
-        cmd.reset();
-        if (cmd.begin({}) != vk::Result::eSuccess) {
-            throw std::runtime_error("Hey! I had crashed right now) idk why :3");
-        }
-
-        cmd.beginRendering(rendering);
-
-        for (auto &comp : components) {
-            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, comp.getPipeline());
-            cmd.bindVertexBuffers(0, *comp.getVertexBuffer(), {0});
-            cmd.bindIndexBuffer(*comp.getIndexBuffer(), {}, vk::IndexType::eUint32);
-        }
-
-        cmd.endRendering();
-        cmd.end();
-
-        vk::SubmitInfo submitI {
-            1,
-            &*renderReady[i],
-            nullptr,
-            1,
-            &cmd,
-            1,
-            &*presentReady[i],
-            nullptr
-        };
-
-        vk::PresentInfoKHR presentI {
-            {},
-            &*presentReady[i],
-            1,
-            &*swapchain,
-            reinterpret_cast<uint32_t*>(&i),
-            nullptr,
-            nullptr
-        };
-
-        queueManager.getQueue(QueueManager::QueueType::GRAPHICS, 0).submit(submitI);
-
-        if (queueManager.getQueue(QueueManager::QueueType::TRANSFER, 0).presentKHR(presentI) != vk::Result::eSuccess) {
-            throw std::runtime_error("Oh.. I had just crashed, you know what to do... maybe");
-        }
+    // Acquire image with semaphore
+    auto [result, img] = swapchain.acquireNextImage(100000, renderReady[i], nullptr);
+    if (result != vk::Result::eSuccess) {
+        std::cerr << "Failed to acquire image" << std::endl;
+        return;
     }
+
+    size_t imageIndex = img % images.size();
+
+    // Let`s begin DYNAMIC RENDERING BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOM
+    vk::Rect2D render_area = vk::Rect2D{0, rect};
+
+    vk::ClearValue colorClearValue = vk::ClearColorValue{std::array<float, 4>{0.01, 0.01, 0.01, 0.5}};
+    vk::ClearValue depthStencilClearValue = vk::ClearDepthStencilValue{1.0 , 1};
+
+    // attachments
+    vk::RenderingAttachmentInfoKHR color(
+        *imageViews[imageIndex],
+        vk::ImageLayout::eColorAttachmentOptimal,
+        vk::ResolveModeFlagBits::eNone,
+        nullptr,
+        vk::ImageLayout::ePresentSrcKHR,
+        vk::AttachmentLoadOp::eClear,
+        vk::AttachmentStoreOp::eStore,
+        colorClearValue,
+        nullptr
+    );
+
+    vk::RenderingInfoKHR rendering {
+        {},
+        vk::Rect2D{{}, rect},
+        1,
+        0,
+        1,
+        &color,
+        nullptr,
+        nullptr,
+        nullptr
+    };
+
+    vk::raii::CommandBuffer& cmd = cmds[i];
+        
+    cmd.reset();
+    cmd.begin({});
+
+    // Transition image from UNDEFINED to COLOR_ATTACHMENT_OPTIMAL
+    vk::ImageMemoryBarrier barrier(
+        vk::AccessFlagBits::eNone,
+        vk::AccessFlagBits::eColorAttachmentWrite,
+        vk::ImageLayout::eUndefined,
+        vk::ImageLayout::eColorAttachmentOptimal,
+        vk::QueueFamilyIgnored,
+        vk::QueueFamilyIgnored,
+        images[imageIndex],
+        vk::ImageSubresourceRange{
+            vk::ImageAspectFlagBits::eColor,
+            0, 1, 0, 1
+        },
+        nullptr
+    );
+    cmd.pipelineBarrier(
+        vk::PipelineStageFlagBits::eTopOfPipe,
+        vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        vk::DependencyFlags{},
+        nullptr,
+        nullptr,
+        barrier
+    );
+
+    cmd.beginRendering(rendering);
+
+    cmd.setViewport(0, vk::Viewport{
+        0.0f, 0.0f,
+        static_cast<float>(rect.width), static_cast<float>(rect.height),
+        0.0f, 1.0f
+    });
+    cmd.setScissor(0, vk::Rect2D{{0, 0}, rect});
+
+    for (auto &comp : components) {
+        cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *comp->getPipeline());
+        cmd.bindVertexBuffers(0, *comp->getVertexBuffer(), {0});
+        cmd.bindIndexBuffer(*comp->getIndexBuffer(), 0, vk::IndexType::eUint32);
+        cmd.drawIndexed(static_cast<uint32_t>(comp->getMesh().indices.size()), 1, 0, 0, 0);
+    }
+
+    cmd.endRendering();
+
+    // Transition image from COLOR_ATTACHMENT_OPTIMAL to PRESENT_SRC_KHR
+    vk::ImageMemoryBarrier presentBarrier(
+        vk::AccessFlagBits::eColorAttachmentWrite,
+        vk::AccessFlagBits::eNone,
+        vk::ImageLayout::eColorAttachmentOptimal,
+        vk::ImageLayout::ePresentSrcKHR,
+        vk::QueueFamilyIgnored,
+        vk::QueueFamilyIgnored,
+        images[imageIndex],
+        vk::ImageSubresourceRange{
+            vk::ImageAspectFlagBits::eColor,
+            0, 1, 0, 1
+        },
+        nullptr
+    );
+    cmd.pipelineBarrier(
+        vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        vk::PipelineStageFlagBits::eBottomOfPipe,
+        vk::DependencyFlags{},
+        nullptr,
+        nullptr,
+        presentBarrier
+    );
+
+    cmd.end();
+
+    vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    vk::SubmitInfo submitI {
+        1,
+        &*renderReady[img],
+        &waitStage,
+        1,
+        &*cmd,
+        1,
+        &*presentReady[img],
+        nullptr
+    };
+
+    vk::PresentInfoKHR presentI {
+        1,
+        &*presentReady[img],
+        1,
+        &*swapchain,
+        &img,
+        nullptr
+    };
+
+    queueManager.getQueue(QueueManager::QueueType::GRAPHICS, 0).submit(submitI, *fences[i]);
+    if (queueManager.getQueue(QueueManager::QueueType::GRAPHICS, 0).presentKHR(presentI) != vk::Result::eSuccess) {
+        throw std::runtime_error("Present failed");
+    }
+
+    i = (i + 1) % framesInFlight;
 }
 
 }

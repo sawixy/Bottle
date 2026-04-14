@@ -12,7 +12,7 @@ void Context::initInstance(vk::raii::Instance& instance) {
         VK_MAKE_VERSION(0, 0, 1), // Application version from config
         "Bottle",
         VK_MAKE_VERSION(0, 0, 1), // TODO: Engine version from CMake
-        vk::ApiVersion13,
+        vk::ApiVersion14,
     };
 
     // TODO: Make checking extensions and layers support

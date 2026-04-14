@@ -47,6 +47,7 @@ public:
             case QueueType::GRAPHICS: return graphics[(index < graphics.size() ? index : throw std::runtime_error("Out of boundaries"))];
             case QueueType::TRANSFER: return transfer[(index < transfer.size() ? index : throw std::runtime_error("Out of boundaries"))];
             case QueueType::COMPUTE:  return compute[(index < compute.size() ? index : throw std::runtime_error("Out of boundaries"))];
+            default: throw std::runtime_error("Invalid queue type");
         }
     }
 };

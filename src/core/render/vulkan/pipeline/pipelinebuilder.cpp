@@ -9,31 +9,48 @@
 
 namespace bottle::core::render::vulkan {
 
-vk::raii::Pipeline PipelineBuilder::build() {
+void PipelineBuilder::build() {
     std::vector<vk::PipelineShaderStageCreateInfo> shadersCI;
+    modules.clear();
 
     for (auto shader : shaders) {
+        modules.push_back(std::move(std::get<vk::raii::ShaderModule>(shader->getCode().code)));
+
         // TODO: Make exception checking
         shadersCI.push_back(vk::PipelineShaderStageCreateInfo {
             {},
             (shader->getType() == resources::render::ShaderResource::ShaderType::VERTEX) ? vk::ShaderStageFlagBits::eVertex : (shader->getType() == resources::render::ShaderResource::ShaderType::FRAGMENT ? vk::ShaderStageFlagBits::eFragment : vk::ShaderStageFlagBits::eCompute),
-            std::get<vk::raii::ShaderModule>(shader->getCode().code),
+            *modules.back(),
             shader->getName().c_str(),
             nullptr,
             nullptr
         });
     }
 
+    vertexInputCI.setVertexBindingDescriptionCount(static_cast<uint32_t>(vertexBindings.size()));
+    vertexInputCI.setPVertexBindingDescriptions(vertexBindings.data());
+    vertexInputCI.setVertexAttributeDescriptionCount(static_cast<uint32_t>(vertexAttributes.size()));
+    vertexInputCI.setPVertexAttributeDescriptions(vertexAttributes.data());
+
     // TODO: Make uniform, push constants support
     vk::PipelineLayoutCreateInfo layoutCI {
         {},
-        1,
+        0,
         nullptr,
-        1,
+        0,
         nullptr,
         nullptr
     };
-    vk::PipelineLayout layout = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext().getDevice().createPipelineLayout(layoutCI);
+    layout = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext().getDevice().createPipelineLayout(layoutCI);
+
+    vk::PipelineRenderingCreateInfo renderingCI {
+        {},
+        static_cast<uint32_t>(colorFormats.size()),
+        colorFormats.data(),
+        depthFormat,
+        vk::Format::eUndefined,
+        nullptr
+    };
 
     // TODO: Make inherit pipelines
     vk::GraphicsPipelineCreateInfo pipelineCI {
@@ -43,7 +60,7 @@ vk::raii::Pipeline PipelineBuilder::build() {
         &vertexInputCI,
         &inputAssemblyCI,
         nullptr,
-        nullptr,
+        &viewportCI,
         &rasterizationCI,
         &multisamplingCI,
         &depthStencilCI,
@@ -54,10 +71,10 @@ vk::raii::Pipeline PipelineBuilder::build() {
         0,
         nullptr,
         0,
-        nullptr
+        &renderingCI
     };
 
-    return std::move(dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext().getDevice().createGraphicsPipeline(nullptr, pipelineCI));
+    pipeline = std::move(dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext().getDevice().createGraphicsPipeline(nullptr, pipelineCI));
 }
 
 }

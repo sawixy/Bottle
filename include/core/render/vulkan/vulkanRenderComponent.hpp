@@ -13,13 +13,14 @@ private:
     vk::raii::DeviceMemory verticesMemory{nullptr};
     vk::raii::Buffer indices{nullptr};
     vk::raii::DeviceMemory indicesMemory{nullptr};
+    std::vector<vk::raii::ShaderModule> shaderModules;
 
     void loadBuffers();
     void initBuffers();
 
 public:
-    VulkanRenderComponent(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<resources::render::ShaderResource*> shaders)
-        : RenderComponent(std::move(mesh), std::move(shaders)), pipeline(std::move(pipeline)) {
+    VulkanRenderComponent(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::vector<vk::raii::ShaderModule> shaderModules)
+        : RenderComponent(std::move(mesh), std::move(shaders)), pipeline(std::move(pipeline)), shaderModules(std::move(shaderModules)) {
         initBuffers();
         loadBuffers();
     }

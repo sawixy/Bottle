@@ -7,8 +7,6 @@
 #include <core/render/renderSystem.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#define FRAMES_IN_FLIGHT 3
-
 namespace bottle::core::render::vulkan {
 
 class VulkanRenderer {
@@ -26,22 +24,31 @@ private:
     vk::Extent2D rect;
     vk::SurfaceFormatKHR format;
 
+    uint32_t framesInFlight;
+
     std::vector<vk::raii::Semaphore> renderReady;
     std::vector<vk::raii::Semaphore> presentReady;
     std::vector<vk::raii::Fence> fences;
 
     vk::raii::CommandPool graphicsPool{nullptr};
-    vk::raii::CommandBuffers cmds{nullptr};
+    std::vector<vk::raii::CommandBuffer> cmds;
 
 public:
     VulkanRenderer() {
         queueManager.createQueues();
         initSwapchain();
         createImages();
+        framesInFlight = images.size();  // Match the actual number of swapchain images
+        initCommandBuffers();
 
-        for (int i = 0; i < FRAMES_IN_FLIGHT; i++) {
+        // Create semaphores for each frame
+        for (uint32_t i = 0; i < framesInFlight; i++) {
             renderReady.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
             presentReady.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
+        }
+        
+        // Create fences for frame pacing
+        for (uint32_t i = 0; i < framesInFlight; i++) {
             fences.push_back(vk::raii::Fence(ctx.getDevice(), vk::FenceCreateInfo {vk::FenceCreateFlagBits::eSignaled}));
         }
     }
@@ -52,6 +59,7 @@ public:
 
     Context& getContext() { return ctx; }
     QueueManager getQueueManager() { return queueManager; }
+    vk::Format getFormat() { return format.format; }
 
     void render(const std::vector<VulkanRenderComponent*>& components);
 };

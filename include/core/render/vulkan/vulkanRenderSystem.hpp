@@ -1,5 +1,4 @@
 #pragma once
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #include <core/render/vulkan/renderer.hpp>
 #include <core/render/renderSystem.hpp>
 #include <vulkan/vulkan_raii.hpp>
@@ -15,6 +14,13 @@ public:
     VulkanRenderSystem() {}
 
     void addComponent(std::unique_ptr<RenderComponent> comp) override;
+    std::unique_ptr<resources::render::ShaderResource> createShaderResource(
+        const std::string& name,
+        const std::string& path,
+        resources::render::ShaderResource::ShaderType type) override;
+    std::unique_ptr<RenderComponent> createComponent(
+        Mesh mesh,
+        std::vector<resources::render::ShaderResource*> shaders) override;
     VulkanRenderer& getRenderer() { return renderer; };
     void update() override;
 

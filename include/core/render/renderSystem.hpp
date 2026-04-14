@@ -3,6 +3,7 @@
 #include <core/resources/render/shaderResource.hpp>
 #include <core/utils/ecs/system.hpp>
 #include <memory>
+#include <string>
 #include <vector>
 #include <stdint.h>
 
@@ -53,6 +54,13 @@ public:
 class RenderSystem: public utils::System {
 public:
     virtual void addComponent(std::unique_ptr<RenderComponent> comp) = 0;
+    virtual std::unique_ptr<resources::render::ShaderResource> createShaderResource(
+        const std::string& name,
+        const std::string& path,
+        resources::render::ShaderResource::ShaderType type) = 0;
+    virtual std::unique_ptr<RenderComponent> createComponent(
+        Mesh mesh,
+        std::vector<resources::render::ShaderResource*> shaders) = 0;
     virtual void update() override = 0;
     virtual ~RenderSystem() override = default;
 };

@@ -46,7 +46,7 @@ ShaderCode VulkanShaderResource::getCode() {
 
     vk::ShaderModuleCreateInfo shaderModuleCI {
         {},
-        code.size(),
+        code.size()*sizeof(uint32_t),
         code.data(),
         nullptr
     };
