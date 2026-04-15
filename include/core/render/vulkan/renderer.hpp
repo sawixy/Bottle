@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vulkan/vulkan.hpp"
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
 #include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/queuemanager.hpp>
@@ -26,8 +27,8 @@ private:
 
     uint32_t framesInFlight;
 
-    std::vector<vk::raii::Semaphore> renderReady;
-    std::vector<vk::raii::Semaphore> presentReady;
+    std::vector<vk::raii::Semaphore> imageAvailableSemaphores;
+    std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
     std::vector<vk::raii::Fence> fences;
 
     vk::raii::CommandPool graphicsPool{nullptr};
@@ -43,8 +44,8 @@ public:
 
         // Create semaphores for each frame
         for (uint32_t i = 0; i < framesInFlight; i++) {
-            renderReady.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
-            presentReady.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
+            imageAvailableSemaphores.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
+            renderFinishedSemaphores.push_back(vk::raii::Semaphore(ctx.getDevice(), vk::SemaphoreCreateInfo()));
         }
         
         // Create fences for frame pacing

@@ -36,7 +36,7 @@ int main() {
         {0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f},
         {-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f}
     };
-    mesh.indices = {0, 1, 2};
+    mesh.indices = {2, 1, 0};
 
     auto component = renderSystem->createComponent(std::move(mesh), shaderList);
     auto* componentPtr = component.get();

@@ -68,7 +68,7 @@ public:
         rasterizationCI.setPolygonMode(vk::PolygonMode::eFill);
         rasterizationCI.setLineWidth(1.0);
         rasterizationCI.setCullMode(vk::CullModeFlagBits::eBack);
-        rasterizationCI.setFrontFace(vk::FrontFace::eClockwise);
+        rasterizationCI.setFrontFace(vk::FrontFace::eCounterClockwise);
         rasterizationCI.setDepthBiasConstantFactor(0.0);
         rasterizationCI.setDepthBiasSlopeFactor(0.0);
         rasterizationCI.setDepthBiasClamp(0.0);
