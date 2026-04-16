@@ -15,7 +15,9 @@
 namespace bottle::core::render::vulkan {
 
 void VulkanRenderer::initSwapchain() {
+#ifdef DEBUG
     std::cout << "Swapchain initialization started" << std::endl;
+#endif
     surface = utils::Locator::Instance().get<window::WindowSystem>()->vulkanInit(*ctx.getInstance());
     vk::SurfaceCapabilitiesKHR surfaceCaps = ctx.getPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
     std::vector<vk::SurfaceFormatKHR> formats = ctx.getPhysicalDevice().getSurfaceFormatsKHR(surface);
@@ -89,7 +91,9 @@ void VulkanRenderer::initSwapchain() {
 
     swapchain = std::move(ctx.getDevice().createSwapchainKHR(swapchainCI));
 
+#ifdef DEBUG
     std::cout << "Swapchain initialized successfully" << std::endl;
+#endif
 }
 
 void VulkanRenderer::createImages() {
@@ -210,23 +214,33 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
         nullptr
     };
 
+#ifdef DEBUG
     std::cout << "Swapchain image count: " << images.size() << std::endl;
     std::cout << "framesInFlight: " << framesInFlight << std::endl;
     std::cout << "cmds size: " << cmds.size() << std::endl;
+#endif
 
     // record command buffer
+#ifdef DEBUG
     std::cout << "Recording command buffer for frame " << currentFrame << std::endl;
     std::cout << "Getting command buffer" << std::endl;
+#endif
     vk::raii::CommandBuffer& cmd = cmds[currentFrame];
 
+#ifdef DEBUG
     std::cout << "Beginning command buffer" << std::endl;
+#endif
     try {
         cmd.begin(cmdBeginInfo);
     } catch (const vk::SystemError& err) {
+#ifdef DEBUG
         std::cerr << "Failed to begin command buffer: " << err.what() << std::endl;
+#endif
         throw;
     }
+#ifdef DEBUG
     std::cout << "Beginning rendering" << std::endl;
+#endif
 
     vk::ImageMemoryBarrier preBarrier {
         vk::AccessFlagBits::eNone,
@@ -247,39 +261,55 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
 
     cmd.beginRendering(renderInfo);
 
+#ifdef DEBUG
     std::cout << "Swapchain format: " << vk::to_string(format.format) << std::endl;
 
     std::cout << "Rendering " << components.size() << " components" << std::endl;
+#endif
     for (VulkanRenderComponent* component : components) {
         const auto& mesh = component->getMesh();
+#ifdef DEBUG
         std::cout << "Rendering component: vertices=" << mesh.vertices.size()
                   << " indices=" << mesh.indices.size()
                   << " shaders=" << component->getShaders().size() << std::endl;
         std::cout << "Binding pipeline: " << *component->getPipeline() << std::endl;
+#endif
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, component->getPipeline());
+#ifdef DEBUG
         std::cout << "Viewport and scissor setup" << std::endl;
         std::cout << "Viewport: x=0, y=0, width=" << rect.width << ", height=" << rect.height << std::endl;
+#endif
         vk::Viewport viewport {
             0.0f, 0.0f,
             static_cast<float>(rect.width), static_cast<float>(rect.height),
             0.0f, 1.0f
         };
         cmd.setViewport(0, viewport);
+#ifdef DEBUG
         std::cout << "Scissor: offset=(0,0), extent=(" << rect.width << "," << rect.height << ")" << std::endl;
+#endif
         vk::Rect2D scissor {
             {0, 0},
             rect
         };
         cmd.setScissor(0, scissor);
+#ifdef DEBUG
         std::cout << "Binding vertex buffer" << std::endl;
+#endif
         cmd.bindVertexBuffers(0, *component->getVertexBuffer(), {0});
+#ifdef DEBUG
         std::cout << "Binding index buffer and drawing" << std::endl;
+#endif
         cmd.bindIndexBuffer(*component->getIndexBuffer(), 0, vk::IndexType::eUint32);
+#ifdef DEBUG
         std::cout << "Drawing indexed with " << component->getIndices().size() << " indices" << std::endl;
+#endif
         cmd.drawIndexed(component->getIndices().size(), 1, 0, 0, 0);
     }
 
+#ifdef DEBUG
     std::cout << "Ending rendering" << std::endl;
+#endif
 
     cmd.endRendering();
 
@@ -307,10 +337,14 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
         barrier
     );
 
+#ifdef DEBUG
     std::cout << "Ending command buffer" << std::endl;
+#endif
     cmd.end();
 
+#ifdef DEBUG
     std::cout << "Submitting command buffer" << std::endl;
+#endif
     vk::PipelineStageFlags waitStages = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     vk::SubmitInfo submitInfo {
         1,
@@ -335,7 +369,9 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
     };
 
     vk::Result result = queueManager.getQueue(QueueManager::QueueType::TRANSFER, 0).presentKHR(presentInfo);
+#ifdef DEBUG
     std::cout << "Present result: " << vk::to_string(res) << std::endl;
+#endif
 
     if (result != vk::Result::eSuccess) {
         throw std::runtime_error("Failed to present swapchain image");
