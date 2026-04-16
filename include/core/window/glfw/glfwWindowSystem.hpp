@@ -16,6 +16,12 @@ public:
 
     vk::SurfaceKHR vulkanInit(VkInstance instance) override;
 
+    std::vector<const char*> getRequiredVulkanExtensions() const override {
+        uint32_t glfwExtensionCount = 0;
+        const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+        return std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
+    }
+
     void update() override;
 
     ~GLFWWindowSystem();

@@ -8,6 +8,7 @@ namespace bottle::core::window {
 class WindowSystem : public utils::System {
 public:
     virtual vk::SurfaceKHR vulkanInit(VkInstance instance) = 0;
+    virtual std::vector<const char*> getRequiredVulkanExtensions() const = 0;
     virtual void update() override = 0;
 };
 

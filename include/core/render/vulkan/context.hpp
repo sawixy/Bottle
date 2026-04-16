@@ -13,11 +13,8 @@ const std::vector<const char*> layers{
 };
 
 /* Exstensions */
-// TODO: replace with platform specific extensions
 const std::vector<const char*> InstanceExtensions {
-    "VK_KHR_surface",
-    "VK_KHR_wayland_surface",
-    "VK_KHR_xcb_surface",
+    "VK_KHR_surface"
 };
 
 const std::vector<const char*> DeviceExtensions {
