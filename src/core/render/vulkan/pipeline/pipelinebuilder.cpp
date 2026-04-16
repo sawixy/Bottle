@@ -52,10 +52,12 @@ void PipelineBuilder::build() {
         nullptr
     };
 
+    std::cout << "Building pipeline with " << shadersCI.size() << " shader stages, " << vertexBindings.size() << " vertex bindings, " << vertexAttributes.size() << " vertex attributes, " << attachments.size() << " color blend attachments, " << dynamicStates.size() << " dynamic states." << std::endl;
+
     // TODO: Make inherit pipelines
     vk::GraphicsPipelineCreateInfo pipelineCI {
         {},
-        static_cast<uint32_t>(shaders.size()),
+        static_cast<uint32_t>(shadersCI.size()),
         shadersCI.data(),
         &vertexInputCI,
         &inputAssemblyCI,

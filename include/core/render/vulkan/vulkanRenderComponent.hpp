@@ -3,6 +3,7 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan.hpp>
 #include <core/render/renderSystem.hpp>
+#include <iostream>
 
 namespace bottle::core::render::vulkan {
 
@@ -20,7 +21,8 @@ private:
 
 public:
     VulkanRenderComponent(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::vector<vk::raii::ShaderModule> shaderModules)
-        : RenderComponent(std::move(mesh), std::move(shaders)), pipeline(std::move(pipeline)), shaderModules(std::move(shaderModules)) {
+        : RenderComponent(mesh, std::move(shaders)), pipeline(std::move(pipeline)), shaderModules(std::move(shaderModules)) {
+        std::cout << "Vertices: " << mesh.vertices.size() << ", Indices: " << mesh.indices.size() << std::endl;
         initBuffers();
         loadBuffers();
     }

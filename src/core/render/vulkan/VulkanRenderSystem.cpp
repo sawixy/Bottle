@@ -1,3 +1,4 @@
+#include "vulkan/vulkan.hpp"
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #include <vulkan/vulkan.hpp>
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -40,9 +41,12 @@ std::unique_ptr<RenderComponent> VulkanRenderSystem::createComponent(
     Mesh mesh,
     std::vector<resources::render::ShaderResource*> shaders) {
     PipelineBuilder builder;
+    std::cout << "Vertex count: " << mesh.vertices.size() << ", Index count: " << mesh.indices.size() << std::endl;
     for (auto shader : shaders) {
         builder.addShader(shader);
     }
+
+    std::cout << "Format: " << vk::to_string(renderer.getFormat()) << std::endl;
 
     builder
         .addVertexBinding(0, sizeof(Vertex), vk::VertexInputRate::eVertex)
@@ -54,7 +58,7 @@ std::unique_ptr<RenderComponent> VulkanRenderSystem::createComponent(
     builder.build();
 
     auto pipeline = std::move(builder.getPipeline());
-    return std::make_unique<VulkanRenderComponent>(std::move(pipeline), std::move(mesh), std::move(shaders), std::move(builder.getModules()));
+    return std::make_unique<VulkanRenderComponent>(std::move(pipeline), mesh, std::move(shaders), std::move(builder.getModules()));
 }
 
 void VulkanRenderSystem::update() {

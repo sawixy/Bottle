@@ -38,7 +38,7 @@ void VulkanRenderer::initSwapchain() {
     // format
     bool foundPreferred = false;
     for (auto fmt : formats) {
-        if (fmt.format == vk::Format::eA8B8G8R8SrgbPack32 && fmt.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+        if (fmt.format == vk::Format::eR8G8B8A8Srgb && fmt.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
             format = fmt;
             foundPreferred = true;
             break;
@@ -163,7 +163,7 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
         vk::ImageLayout::eUndefined,
         vk::AttachmentLoadOp::eClear,
         vk::AttachmentStoreOp::eStore,
-        vk::ClearValue(std::array<float, 4>{0.5f, 0.1f, 0.1f, 1.0f}),
+        vk::ClearValue(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f}),
         nullptr
 
     };
@@ -231,7 +231,7 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
     vk::ImageMemoryBarrier preBarrier {
         vk::AccessFlagBits::eNone,
         vk::AccessFlagBits::eColorAttachmentWrite,
-        vk::ImageLayout::ePresentSrcKHR,
+        vk::ImageLayout::eUndefined,
         vk::ImageLayout::eColorAttachmentOptimal,
         VK_QUEUE_FAMILY_IGNORED,
         VK_QUEUE_FAMILY_IGNORED,
@@ -247,18 +247,25 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
 
     cmd.beginRendering(renderInfo);
 
+    std::cout << "Swapchain format: " << vk::to_string(format.format) << std::endl;
+
     std::cout << "Rendering " << components.size() << " components" << std::endl;
     for (VulkanRenderComponent* component : components) {
-        std::cout << "Rendering component" << std::endl;
-        std::cout << "Binding pipeline" << std::endl;
+        const auto& mesh = component->getMesh();
+        std::cout << "Rendering component: vertices=" << mesh.vertices.size()
+                  << " indices=" << mesh.indices.size()
+                  << " shaders=" << component->getShaders().size() << std::endl;
+        std::cout << "Binding pipeline: " << *component->getPipeline() << std::endl;
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, component->getPipeline());
         std::cout << "Viewport and scissor setup" << std::endl;
+        std::cout << "Viewport: x=0, y=0, width=" << rect.width << ", height=" << rect.height << std::endl;
         vk::Viewport viewport {
             0.0f, 0.0f,
             static_cast<float>(rect.width), static_cast<float>(rect.height),
             0.0f, 1.0f
         };
         cmd.setViewport(0, viewport);
+        std::cout << "Scissor: offset=(0,0), extent=(" << rect.width << "," << rect.height << ")" << std::endl;
         vk::Rect2D scissor {
             {0, 0},
             rect
@@ -312,7 +319,7 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
         1,
         &*cmd,
         1,
-        &*renderFinishedSemaphores[currentFrame],
+        &*renderFinishedSemaphores[img],
         nullptr
     };
     
@@ -320,18 +327,23 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
 
     vk::PresentInfoKHR presentInfo {
         1,
-        &*renderFinishedSemaphores[currentFrame],
+        &*renderFinishedSemaphores[img],
         1,
         &*swapchain,
         &img,
         nullptr
     };
 
-    if (queueManager.getQueue(QueueManager::QueueType::GRAPHICS, 0).presentKHR(presentInfo) != vk::Result::eSuccess) {
+    vk::Result result = queueManager.getQueue(QueueManager::QueueType::TRANSFER, 0).presentKHR(presentInfo);
+    std::cout << "Present result: " << vk::to_string(res) << std::endl;
+
+    if (result != vk::Result::eSuccess) {
         throw std::runtime_error("Failed to present swapchain image");
     }
 
     currentFrame = (currentFrame + 1) % framesInFlight;
+
+    ctx.getDevice().waitIdle();
 }
 
 }

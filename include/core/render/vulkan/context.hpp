@@ -17,11 +17,11 @@ const std::vector<const char*> layers{
 const std::vector<const char*> InstanceExtensions {
     "VK_KHR_surface",
     "VK_KHR_wayland_surface",
+    "VK_KHR_xcb_surface",
 };
 
 const std::vector<const char*> DeviceExtensions {
     "VK_KHR_swapchain",
-    "VK_EXT_swapchain_colorspace",
     "VK_KHR_dynamic_rendering"
 };
 

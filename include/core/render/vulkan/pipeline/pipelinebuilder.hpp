@@ -37,7 +37,11 @@ private:
             vk::BlendOp::eAdd,
             vk::BlendFactor::eOne,
             vk::BlendFactor::eZero,
-            vk::BlendOp::eAdd
+            vk::BlendOp::eAdd,
+            vk::ColorComponentFlagBits::eR |
+            vk::ColorComponentFlagBits::eG |
+            vk::ColorComponentFlagBits::eB |
+            vk::ColorComponentFlagBits::eA
         }
     };
     vk::PipelineColorBlendStateCreateInfo colorBlendCI;
@@ -62,12 +66,12 @@ public:
         depthStencilCI.setMinDepthBounds(0.0);
         depthStencilCI.setMaxDepthBounds(1.0);
 
-        rasterizationCI.setDepthBiasEnable(vk::True);
+        rasterizationCI.setDepthBiasEnable(vk::False);
         rasterizationCI.setDepthClampEnable(vk::False);
         rasterizationCI.setRasterizerDiscardEnable(vk::False);
         rasterizationCI.setPolygonMode(vk::PolygonMode::eFill);
         rasterizationCI.setLineWidth(1.0);
-        rasterizationCI.setCullMode(vk::CullModeFlagBits::eBack);
+        rasterizationCI.setCullMode(vk::CullModeFlagBits::eNone);
         rasterizationCI.setFrontFace(vk::FrontFace::eCounterClockwise);
         rasterizationCI.setDepthBiasConstantFactor(0.0);
         rasterizationCI.setDepthBiasSlopeFactor(0.0);
