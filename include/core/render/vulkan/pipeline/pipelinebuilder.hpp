@@ -49,55 +49,7 @@ private:
     vk::Format depthFormat = vk::Format::eUndefined;
 
 public:
-    PipelineBuilder() {
-        // defaults
-        vertexInputCI.setVertexAttributeDescriptionCount(0);
-        vertexInputCI.setPVertexAttributeDescriptions(nullptr);
-        vertexInputCI.setVertexBindingDescriptionCount(0);
-        vertexInputCI.setPVertexBindingDescriptions(nullptr);
-
-        inputAssemblyCI.setTopology(vk::PrimitiveTopology::eTriangleList);
-        inputAssemblyCI.setPrimitiveRestartEnable(vk::False);
-        
-        depthStencilCI.setDepthTestEnable(vk::False);
-        depthStencilCI.setDepthBoundsTestEnable(vk::False);
-        depthStencilCI.setStencilTestEnable(vk::False);
-        depthStencilCI.setDepthWriteEnable(vk::True);
-        depthStencilCI.setMinDepthBounds(0.0);
-        depthStencilCI.setMaxDepthBounds(1.0);
-
-        rasterizationCI.setDepthBiasEnable(vk::False);
-        rasterizationCI.setDepthClampEnable(vk::False);
-        rasterizationCI.setRasterizerDiscardEnable(vk::False);
-        rasterizationCI.setPolygonMode(vk::PolygonMode::eFill);
-        rasterizationCI.setLineWidth(1.0);
-        rasterizationCI.setCullMode(vk::CullModeFlagBits::eNone);
-        rasterizationCI.setFrontFace(vk::FrontFace::eCounterClockwise);
-        rasterizationCI.setDepthBiasConstantFactor(0.0);
-        rasterizationCI.setDepthBiasSlopeFactor(0.0);
-        rasterizationCI.setDepthBiasClamp(0.0);
-        
-        viewportCI.setViewportCount(1);
-        viewportCI.setPViewports(nullptr);
-        viewportCI.setScissorCount(1);
-        viewportCI.setPScissors(nullptr);
-
-        multisamplingCI.setRasterizationSamples(vk::SampleCountFlagBits::e1);
-        multisamplingCI.setSampleShadingEnable(vk::True);
-        multisamplingCI.setAlphaToCoverageEnable(vk::False);
-        multisamplingCI.setPSampleMask(nullptr);
-        multisamplingCI.setAlphaToOneEnable(vk::False);
-        multisamplingCI.setMinSampleShading(1.0);
-
-        dynamicCI.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
-        dynamicCI.setPDynamicStates(dynamicStates.data());
-
-        colorBlendCI.setAttachmentCount(attachments.size());
-        colorBlendCI.setPAttachments(attachments.data());
-        colorBlendCI.setBlendConstants(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 });
-        colorBlendCI.setLogicOpEnable(vk::False);
-        colorBlendCI.setLogicOp(vk::LogicOp::eCopy);
-    }
+    PipelineBuilder();
 
     PipelineBuilder& addShader(resources::render::ShaderResource* shader) { shaders.push_back(shader); return *this; }
     PipelineBuilder& addVertexBinding(uint32_t binding, uint32_t stride, vk::VertexInputRate inputRate = vk::VertexInputRate::eVertex) {
