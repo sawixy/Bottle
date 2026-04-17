@@ -5,7 +5,6 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #include <core/render/vulkan/vulkanRenderSystem.hpp>
 #include <core/resources/render/vulkan/VulkanShaderResource.hpp>
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
-#include <memory>
 
 namespace bottle::core::render::vulkan {
 

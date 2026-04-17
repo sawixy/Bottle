@@ -1,4 +1,3 @@
-#include "core/render/renderSystem.hpp"
 #include "core/render/vulkan/queuemanager.hpp"
 #include "core/utils/locator.hpp"
 #include "core/window/windowSystem.hpp"
@@ -11,7 +10,9 @@
 #include <vector>
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
 
+#ifdef DEBUG
 #include <iostream>
+#endif
 #include <vulkan/vulkan_core.h>
 
 namespace bottle::core::render::vulkan {
