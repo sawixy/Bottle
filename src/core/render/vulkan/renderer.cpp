@@ -1,3 +1,4 @@
+#include "core/render/renderSystem.hpp"
 #include "core/render/vulkan/queuemanager.hpp"
 #include "core/utils/locator.hpp"
 #include "core/window/windowSystem.hpp"
@@ -8,6 +9,7 @@
 #include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/renderer.hpp>
 #include <vector>
+#include <core/render/vulkan/vulkanRenderComponent.hpp>
 
 #include <iostream>
 #include <vulkan/vulkan_core.h>
@@ -145,7 +147,7 @@ void VulkanRenderer::initCommandBuffers() {
     cmds = std::move(ctx.getDevice().allocateCommandBuffers(cmdallocCI));
 }
 
-void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& components) {
+void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
     static uint32_t currentFrame = 0;
 
     if (ctx.getDevice().waitForFences(*fences[currentFrame], vk::True, 432857092384570) != vk::Result::eSuccess) {
@@ -169,7 +171,6 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
         vk::AttachmentStoreOp::eStore,
         vk::ClearValue(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f}),
         nullptr
-
     };
 
     vk::RenderingAttachmentInfoKHR depth {
@@ -266,15 +267,23 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
 
     std::cout << "Rendering " << components.size() << " components" << std::endl;
 #endif
-    for (VulkanRenderComponent* component : components) {
-        const auto& mesh = component->getMesh();
+    for (RenderComponent* component : components) {
+#ifdef DEBUG
+        std::cout << "Processing component: " << component << std::endl;
+#endif
+        auto vulkanComponent = reinterpret_cast<VulkanRenderComponentInner*>(component->getInner());
+#ifdef DEBUG
+        std::cout << "Getting mesh" << std::endl;
+#endif
+
+        auto mesh = vulkanComponent->getMesh();
 #ifdef DEBUG
         std::cout << "Rendering component: vertices=" << mesh.vertices.size()
                   << " indices=" << mesh.indices.size()
                   << " shaders=" << component->getShaders().size() << std::endl;
-        std::cout << "Binding pipeline: " << *component->getPipeline() << std::endl;
+        std::cout << "Binding pipeline: " << *vulkanComponent->getPipeline() << std::endl;
 #endif
-        cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, component->getPipeline());
+        cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, vulkanComponent->getPipeline());
 #ifdef DEBUG
         std::cout << "Viewport and scissor setup" << std::endl;
         std::cout << "Viewport: x=0, y=0, width=" << rect.width << ", height=" << rect.height << std::endl;
@@ -296,15 +305,15 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
 #ifdef DEBUG
         std::cout << "Binding vertex buffer" << std::endl;
 #endif
-        cmd.bindVertexBuffers(0, *component->getVertexBuffer(), {0});
+        cmd.bindVertexBuffers(0, *vulkanComponent->getVertexBuffer(), {0});
 #ifdef DEBUG
         std::cout << "Binding index buffer and drawing" << std::endl;
 #endif
-        cmd.bindIndexBuffer(*component->getIndexBuffer(), 0, vk::IndexType::eUint32);
+        cmd.bindIndexBuffer(*vulkanComponent->getIndexBuffer(), 0, vk::IndexType::eUint32);
 #ifdef DEBUG
-        std::cout << "Drawing indexed with " << component->getIndices().size() << " indices" << std::endl;
+        std::cout << "Drawing indexed with " << vulkanComponent->getMesh().indices.size() << " indices" << std::endl;
 #endif
-        cmd.drawIndexed(component->getIndices().size(), 1, 0, 0, 0);
+        cmd.drawIndexed(vulkanComponent->getMesh().indices.size(), 1, 0, 0, 0);
     }
 
 #ifdef DEBUG
@@ -378,8 +387,6 @@ void VulkanRenderer::render(const std::vector<VulkanRenderComponent*>& component
     }
 
     currentFrame = (currentFrame + 1) % framesInFlight;
-
-    ctx.getDevice().waitIdle();
 }
 
 }

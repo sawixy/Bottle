@@ -5,8 +5,6 @@
 #include <core/render/vulkan/context.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#define DEBUG
-
 #ifdef DEBUG
 #include <iostream>
 #endif

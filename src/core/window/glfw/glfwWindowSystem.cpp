@@ -9,6 +9,7 @@
 namespace bottle::core::window::glfw {
 
 GLFWWindowSystem::GLFWWindowSystem() {
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize GLFW");
     }

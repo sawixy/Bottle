@@ -23,7 +23,7 @@ uint32_t findMemoryType(const vk::raii::PhysicalDevice& physicalDevice,
     throw std::runtime_error("Failed to find suitable memory type");
 }
 
-void VulkanRenderComponent::initBuffers() {
+void VulkanRenderComponentInner::initBuffers() {
     int graphics = static_cast<uint32_t>(dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getQueueManager().getFamilyIndex(QueueManager::QueueType::GRAPHICS));
     vk::BufferCreateInfo vbufCI {
         {},
@@ -76,7 +76,7 @@ void VulkanRenderComponent::initBuffers() {
     indices.bindMemory(*indicesMemory, 0);
 }
 
-void VulkanRenderComponent::loadBuffers() {
+void VulkanRenderComponentInner::loadBuffers() {
     Context& ctx = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
 
     std::cout << "Vertices: " << mesh.vertices.size() << ", Indices: " << mesh.indices.size() << std::endl;

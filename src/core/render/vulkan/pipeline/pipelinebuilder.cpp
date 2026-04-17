@@ -7,6 +7,8 @@
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include <iostream>
+
 namespace bottle::core::render::vulkan {
 
 void PipelineBuilder::build() {

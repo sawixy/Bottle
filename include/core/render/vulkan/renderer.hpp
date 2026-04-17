@@ -1,7 +1,6 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include <core/render/vulkan/vulkanRenderComponent.hpp>
 #include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/queuemanager.hpp>
 #include <core/render/vulkan/context.hpp>
@@ -62,7 +61,7 @@ public:
     QueueManager getQueueManager() { return queueManager; }
     vk::Format getFormat() { return format.format; }
 
-    void render(const std::vector<VulkanRenderComponent*>& components);
+    void render(std::vector<RenderComponent*>& components);
 };
 
 }

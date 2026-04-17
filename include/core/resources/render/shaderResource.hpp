@@ -28,8 +28,8 @@ protected:
     std::string name;
 
 public:
-    ShaderResource(std::string name, std::string path, ShaderType type)
-        : isLoaded(false), path(std::move(path)), type(type), name(std::move(name)) {}
+    ShaderResource(std::string name, std::string path, ShaderType type) : path(std::move(path)), type(type), name(std::move(name)) {
+    }
 
     virtual void load() = 0;
     virtual void unload() = 0;

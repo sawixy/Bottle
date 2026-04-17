@@ -1,13 +1,14 @@
 #pragma once
 
+#include "vulkanRenderSystem.hpp"
 #include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan.hpp>
-#include <core/render/renderSystem.hpp>
 #include <iostream>
+#include <core/render/renderComponent.hpp>
 
 namespace bottle::core::render::vulkan {
 
-class VulkanRenderComponent : public RenderComponent {
+class VulkanRenderComponentInner : public RenderComponentInner {
 private:
     vk::raii::Pipeline pipeline;
     vk::raii::Buffer vertices{nullptr};
@@ -20,18 +21,17 @@ private:
     void initBuffers();
 
 public:
-    VulkanRenderComponent(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::vector<vk::raii::ShaderModule> shaderModules)
-        : RenderComponent(mesh, std::move(shaders)), pipeline(std::move(pipeline)), shaderModules(std::move(shaderModules)) {
-        std::cout << "Vertices: " << mesh.vertices.size() << ", Indices: " << mesh.indices.size() << std::endl;
+    VulkanRenderComponentInner(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<vk::raii::ShaderModule> shaders, std::vector<resources::render::ShaderResource*> shaderResources)
+        : RenderComponentInner(mesh, shaderResources), pipeline(std::move(pipeline)), shaderModules(std::move(shaders)) {
         initBuffers();
         loadBuffers();
     }
 
+    void setMesh(Mesh newMesh) override {
+        mesh = std::move(newMesh);
+        loadBuffers();
+    }
     vk::raii::Pipeline& getPipeline() { return pipeline; }
-    const Mesh& getMesh() const { return RenderComponent::getMesh(); }
-    Mesh& getMesh() { return RenderComponent::getMesh(); }
-    const std::vector<resources::render::ShaderResource*>& getShaders() const { return RenderComponent::getShaders(); }
-    std::vector<resources::render::ShaderResource*>& getShaders() { return RenderComponent::getShaders(); }
     vk::raii::Buffer& getVertexBuffer() { return vertices; }
     vk::raii::Buffer& getIndexBuffer() { return indices; }
 };
