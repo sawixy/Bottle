@@ -7,6 +7,8 @@
 #include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/vulkanRenderSystem.hpp>
 
+#include <iostream>
+
 namespace bottle::core::render::vulkan {
 
 uint32_t findMemoryType(const vk::raii::PhysicalDevice& physicalDevice, 
@@ -21,6 +23,10 @@ uint32_t findMemoryType(const vk::raii::PhysicalDevice& physicalDevice,
         }
     }
     throw std::runtime_error("Failed to find suitable memory type");
+}
+
+void VulkanRenderComponentInner::setUniforms() {
+
 }
 
 void VulkanRenderComponentInner::initBuffers() {

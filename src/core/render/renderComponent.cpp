@@ -1,7 +1,9 @@
 #include <core/utils/locator.hpp>
 #include "core/render/renderComponent.hpp"
+#include "vulkan/vulkan.hpp"
 #include <core/render/renderSystem.hpp>
 
+#include <core/render/vulkan/vulkanRenderSystem.hpp>
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
 namespace bottle::core::render {
@@ -26,17 +28,11 @@ RenderComponent::RenderComponent(Mesh mesh, std::vector<resources::render::Shade
             vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
             nullptr
         };
-
-        builder.addDescriptorSetLayout(vk::DescriptorSetLayoutCreateInfo {
-            {},
-            1,
-            &binding
-        });
     }
 
     builder.build();
 
-    inner = new vulkan::VulkanRenderComponentInner(std::move(builder.getPipeline()), mesh, builder.getModules(), shaders, builder.getDescriptorSetLayouts());
+    inner = new vulkan::VulkanRenderComponentInner(std::move(builder.getPipeline()), mesh, builder.getModules(), shaders, builder.getDescriptorSetLayout(), builder.getDescriptorPool(), builder.getLayout());
     utils::Locator::Instance().get<RenderSystem>()->addComponent(this);
 }
 

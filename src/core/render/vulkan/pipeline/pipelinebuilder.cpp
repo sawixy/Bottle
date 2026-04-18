@@ -89,14 +89,30 @@ void PipelineBuilder::build() {
     vertexInputCI.setPVertexAttributeDescriptions(vertexAttributes.data());
 
     // TODO: Make uniform, push constants support
-    for (auto setCI : descriptorSetLayoutsCI) {
-        descriptorSetLayouts.push_back(std::move(ctx.getDevice().createDescriptorSetLayout(setCI)));
+    descriptorSetLayoutCI = vk::DescriptorSetLayoutCreateInfo {
+        {},
+        static_cast<uint32_t>(descriptorSetLayoutBindings.size()),
+        descriptorSetLayoutBindings.data(),
+        nullptr
+    };
+
+    descriptorSetLayout = ctx.getDevice().createDescriptorSetLayout(descriptorSetLayoutCI);
+
+    std::vector<vk::DescriptorPoolSize> poolSizes;
+    for (const auto& binding : descriptorSetLayoutBindings) {
+        vk::DescriptorPoolSize size{};
+        size.type = binding.descriptorType;
+        size.descriptorCount = binding.descriptorCount * 100;
+        poolSizes.push_back(size);
     }
+    poolCI.setPoolSizes(poolSizes); 
+
+    pool = ctx.getDevice().createDescriptorPool(poolCI);
 
     vk::PipelineLayoutCreateInfo layoutCI {
         {},
-        static_cast<uint32_t>(descriptorSetLayouts.size()),
-        &**descriptorSetLayouts.data(),
+        1,
+        &*descriptorSetLayout,
         0,
         nullptr
     };

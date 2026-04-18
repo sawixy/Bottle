@@ -1,7 +1,6 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include <array>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 #include <core/resources/render/shaderResource.hpp>
@@ -51,10 +50,9 @@ private:
     // Unifrom
     vk::DescriptorPoolCreateInfo poolCI;
     vk::raii::DescriptorPool pool{nullptr};
+    vk::raii::DescriptorSetLayout descriptorSetLayout{nullptr};
+    vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCI;
     std::vector<vk::DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
-    std::vector<vk::raii::DescriptorSetLayout> descriptorSetLayouts;
-    std::vector<vk::DescriptorSetLayoutCreateInfo> descriptorSetLayoutsCI;
-    vk::DescriptorSetLayoutBinding descriptorSetLayoutBinding;
 
 public:
     PipelineBuilder();
@@ -70,7 +68,7 @@ public:
     PipelineBuilder& setSampleCount(vk::SampleCountFlagBits sampleCount) { multisamplingCI.setRasterizationSamples(sampleCount); return *this; }
     PipelineBuilder& addColorBlendAttachment(vk::PipelineColorBlendAttachmentState attachment) { attachments.push_back(attachment); colorBlendCI.setAttachmentCount(attachments.size()); return *this; }
     PipelineBuilder& setPoolMaxSets(uint32_t maxSets) { poolCI.setMaxSets(maxSets); return *this; }
-    PipelineBuilder& addDescriptorSetLayout(vk::DescriptorSetLayoutCreateInfo setCI) { descriptorSetLayoutsCI.push_back(setCI); return *this; }
+    PipelineBuilder& addDescriptorSetLayoutBinding(vk::DescriptorSetLayoutBinding binding) { descriptorSetLayoutBindings.push_back(binding); return *this; }
 
     void build();
     
@@ -78,7 +76,7 @@ public:
     std::vector<vk::raii::ShaderModule> getModules() { return std::move(modules); }
     vk::raii::PipelineLayout getLayout() { return std::move(layout); }
     vk::raii::DescriptorPool getDescriptorPool() { return std::move(pool); }
-    std::vector<vk::raii::DescriptorSetLayout> getDescriptorSetLayouts() { return std::move(descriptorSetLayouts); } 
+    vk::raii::DescriptorSetLayout getDescriptorSetLayout() { return std::move(descriptorSetLayout); } 
 };
 
 }

@@ -1,9 +1,7 @@
 #pragma once
 
-#include "vulkanRenderSystem.hpp"
 #include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan.hpp>
-#include <iostream>
 #include <core/render/renderComponent.hpp>
 
 namespace bottle::core::render::vulkan {
@@ -16,18 +14,21 @@ private:
     vk::raii::Buffer indices{nullptr};
     vk::raii::DeviceMemory indicesMemory{nullptr};
     std::vector<vk::raii::ShaderModule> shaderModules;
-    std::vector<vk::raii::DescriptorSetLayout> descriptorSetLayouts;
+    vk::raii::DescriptorSetLayout descriptorSetLayout;
+    vk::raii::DescriptorPool pool;
+    vk::raii::PipelineLayout layout{nullptr};
 
     void loadBuffers();
     void initBuffers();
 
 public:
-    VulkanRenderComponentInner(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<vk::raii::ShaderModule> shaders, std::vector<resources::render::ShaderResource*> shaderResources, std::vector<vk::raii::DescriptorSetLayout> sets)
-        : RenderComponentInner(mesh, shaderResources), pipeline(std::move(pipeline)), shaderModules(std::move(shaders)), descriptorSetLayouts(std::move(sets)) {
+    VulkanRenderComponentInner(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<vk::raii::ShaderModule> shaders, std::vector<resources::render::ShaderResource*> shaderResources, vk::raii::DescriptorSetLayout sets, vk::raii::DescriptorPool pool, vk::raii::PipelineLayout layout)
+        : RenderComponentInner(mesh, shaderResources), pipeline(std::move(pipeline)), shaderModules(std::move(shaders)), descriptorSetLayout(std::move(sets)), pool(std::move(pool)), layout(std::move(layout)) {
         initBuffers();
         loadBuffers();
     }
 
+    void setUniforms();
     void setMesh(Mesh newMesh) override {
         mesh = std::move(newMesh);
         loadBuffers();
