@@ -4,6 +4,7 @@
 #include "vulkan/vulkan.hpp"
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <stdexcept>
 #include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/renderer.hpp>
@@ -149,6 +150,8 @@ void VulkanRenderer::initCommandBuffers() {
 }
 
 void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
+    std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+
     static uint32_t currentFrame = 0;
 
     if (ctx.getDevice().waitForFences(*fences[currentFrame], vk::True, 432857092384570) != vk::Result::eSuccess) {
@@ -388,6 +391,13 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
     }
 
     currentFrame = (currentFrame + 1) % framesInFlight;
+
+    std::chrono::high_resolution_clock::time_point end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> render_time = end_time - start_time;
+#ifdef DEBUG
+    std::cout << "Frame rendered in " << render_time.count() << " ms" << std::endl;
+    std::cout << 1000.0 / render_time.count() << " FPS" << std::endl;
+#endif
 }
 
 }

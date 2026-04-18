@@ -54,6 +54,8 @@ PipelineBuilder::PipelineBuilder() {
     dynamicCI.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
     dynamicCI.setPDynamicStates(dynamicStates.data());
 
+    poolCI.setMaxSets(1000);
+
     colorBlendCI.setAttachmentCount(attachments.size());
     colorBlendCI.setPAttachments(attachments.data());
     colorBlendCI.setBlendConstants(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 });
@@ -79,18 +81,23 @@ void PipelineBuilder::build() {
         });
     }
 
+    auto &ctx = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
+
     vertexInputCI.setVertexBindingDescriptionCount(static_cast<uint32_t>(vertexBindings.size()));
     vertexInputCI.setPVertexBindingDescriptions(vertexBindings.data());
     vertexInputCI.setVertexAttributeDescriptionCount(static_cast<uint32_t>(vertexAttributes.size()));
     vertexInputCI.setPVertexAttributeDescriptions(vertexAttributes.data());
 
     // TODO: Make uniform, push constants support
+    for (auto setCI : descriptorSetLayoutsCI) {
+        descriptorSetLayouts.push_back(std::move(ctx.getDevice().createDescriptorSetLayout(setCI)));
+    }
+
     vk::PipelineLayoutCreateInfo layoutCI {
         {},
+        static_cast<uint32_t>(descriptorSetLayouts.size()),
+        &**descriptorSetLayouts.data(),
         0,
-        nullptr,
-        0,
-        nullptr,
         nullptr
     };
     layout = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext().getDevice().createPipelineLayout(layoutCI);

@@ -48,18 +48,20 @@ private:
     std::vector<vk::Format> colorFormats;
     vk::Format depthFormat = vk::Format::eUndefined;
 
+    // Unifrom
+    vk::DescriptorPoolCreateInfo poolCI;
+    vk::raii::DescriptorPool pool{nullptr};
+    std::vector<vk::DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+    std::vector<vk::raii::DescriptorSetLayout> descriptorSetLayouts;
+    std::vector<vk::DescriptorSetLayoutCreateInfo> descriptorSetLayoutsCI;
+    vk::DescriptorSetLayoutBinding descriptorSetLayoutBinding;
+
 public:
     PipelineBuilder();
 
     PipelineBuilder& addShader(resources::render::ShaderResource* shader) { shaders.push_back(shader); return *this; }
-    PipelineBuilder& addVertexBinding(uint32_t binding, uint32_t stride, vk::VertexInputRate inputRate = vk::VertexInputRate::eVertex) {
-        vertexBindings.push_back(vk::VertexInputBindingDescription{binding, stride, inputRate});
-        return *this;
-    }
-    PipelineBuilder& addVertexAttribute(uint32_t location, uint32_t binding, vk::Format format, uint32_t offset) {
-        vertexAttributes.push_back(vk::VertexInputAttributeDescription{location, binding, format, offset});
-        return *this;
-    }
+    PipelineBuilder& addVertexBinding(uint32_t binding, uint32_t stride, vk::VertexInputRate inputRate = vk::VertexInputRate::eVertex) { vertexBindings.push_back(vk::VertexInputBindingDescription{binding, stride, inputRate}); return *this; }
+    PipelineBuilder& addVertexAttribute(uint32_t location, uint32_t binding, vk::Format format, uint32_t offset) { vertexAttributes.push_back(vk::VertexInputAttributeDescription{location, binding, format, offset}); return *this; }
     PipelineBuilder& setDepthFormat(vk::Format format) { depthFormat = format; return *this; }
     PipelineBuilder& addColorFormat(vk::Format format) { colorFormats.push_back(format); return *this; }
     PipelineBuilder& addDynamicState(vk::DynamicState dynState) { dynamicStates.push_back(dynState); return *this; }
@@ -67,10 +69,16 @@ public:
     PipelineBuilder& setPolygonMode(vk::PolygonMode polygonMode) { rasterizationCI.setPolygonMode(polygonMode); return *this; }
     PipelineBuilder& setSampleCount(vk::SampleCountFlagBits sampleCount) { multisamplingCI.setRasterizationSamples(sampleCount); return *this; }
     PipelineBuilder& addColorBlendAttachment(vk::PipelineColorBlendAttachmentState attachment) { attachments.push_back(attachment); colorBlendCI.setAttachmentCount(attachments.size()); return *this; }
+    PipelineBuilder& setPoolMaxSets(uint32_t maxSets) { poolCI.setMaxSets(maxSets); return *this; }
+    PipelineBuilder& addDescriptorSetLayout(vk::DescriptorSetLayoutCreateInfo setCI) { descriptorSetLayoutsCI.push_back(setCI); return *this; }
+
     void build();
+    
     vk::raii::Pipeline getPipeline() { return std::move(pipeline); }
     std::vector<vk::raii::ShaderModule> getModules() { return std::move(modules); }
     vk::raii::PipelineLayout getLayout() { return std::move(layout); }
+    vk::raii::DescriptorPool getDescriptorPool() { return std::move(pool); }
+    std::vector<vk::raii::DescriptorSetLayout> getDescriptorSetLayouts() { return std::move(descriptorSetLayouts); } 
 };
 
 }

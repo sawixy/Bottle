@@ -45,7 +45,7 @@ private:
     RenderComponentInner* inner;
 
 public:
-    RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders);
+    RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::vector<std::pair<std::string, size_t>> uniforms = {});
 
     Mesh& getMesh() { return inner->getMesh(); }
     std::vector<resources::render::ShaderResource*>& getShaders() { return inner->getShaders(); }
