@@ -1,8 +1,10 @@
+#include "core/render/vulkan/queuemanager.hpp"
 #include "core/render/vulkan/vulkanRenderSystem.hpp"
 #include "core/utils/locator.hpp"
 #include "vulkan/vulkan.hpp"
 #include <core/render/uniform.hpp>
 #include <core/render/vulkan/context.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace bottle::core::render {
 
@@ -17,9 +19,75 @@ vk::DescriptorSetLayoutBinding Uniform::getBinding() {
 }
 
 void Uniform::initBuffer(vk::raii::DescriptorPool& pool, vk::raii::DescriptorSetLayout& layout) {
-    vulkan::Context& ctx = dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
+    auto& ctx = dynamic_cast<vulkan::VulkanRenderSystem*>(
+        utils::Locator::Instance().get<RenderSystem>()
+    )->getRenderer().getContext();
 
-    
+    const vk::DeviceSize bufferSize = last_offset;
+
+    uint32_t graphics = static_cast<uint32_t>(dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getQueueManager().getFamilyIndex(vulkan::QueueManager::QueueType::GRAPHICS));
+    vk::BufferCreateInfo bufferInfo{
+        {},
+        bufferSize,
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::SharingMode::eExclusive,
+        1,
+        &graphics
+    };
+    buf = vk::raii::Buffer(ctx.getDevice(), bufferInfo);
+
+    // 2. Выбираем память (HOST_VISIBLE + HOST_COHERENT)
+    auto memReqs = buf.getMemoryRequirements();
+    auto memProps = ctx.getPhysicalDevice().getMemoryProperties();
+
+    uint32_t memTypeIndex = ~0u;
+    for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
+        if ((memReqs.memoryTypeBits & (1u << i)) &&
+            (memProps.memoryTypes[i].propertyFlags &
+             (vk::MemoryPropertyFlagBits::eHostVisible |
+              vk::MemoryPropertyFlagBits::eHostCoherent))) {
+            memTypeIndex = i;
+            break;
+        }
+    }
+
+    vk::MemoryAllocateInfo allocInfo{
+        bufferSize,
+        0,
+        nullptr
+    };
+    mem = vk::raii::DeviceMemory(ctx.getDevice(), allocInfo);
+    buf.bindMemory(*mem, 0);
+
+    data = mem.mapMemory(0, bufferSize);
+    memset(data, 0, bufferSize);
+
+    vk::DescriptorSetAllocateInfo descSetAllocI {
+        pool,
+        1,
+        &*layout,
+        nullptr
+    };
+    descSet = std::move(ctx.getDevice().allocateDescriptorSets(descSetAllocI)[0]);
+
+    vk::DescriptorBufferInfo bufferDescInfo{
+        buf,
+        last_offset,
+        0
+    };
+
+    vk::WriteDescriptorSet write{
+        descSet,
+        0,
+        0,
+        0,
+        vk::DescriptorType::eUniformBuffer,
+        nullptr,
+        &bufferDescInfo,
+        nullptr
+    };
+
+    ctx.getDevice().updateDescriptorSets(write, nullptr);
 }
 
 
