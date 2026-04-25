@@ -37,6 +37,8 @@ private:
     vk::raii::Buffer buf{nullptr};
     vk::raii::DeviceMemory mem{nullptr};
     vk::raii::DescriptorSet descSet{nullptr};
+    vk::raii::DescriptorSetLayout setLayout{nullptr};
+    vk::raii::DescriptorPool pool{nullptr};
 
     std::unordered_map<std::string, UniformUnit> map;
 
@@ -63,11 +65,22 @@ public:
             last_offset += getSize(type);
         }
     }
+    Uniform() {}
+
+    void addType(std::string name, UniformType type) {
+        map[name] = UniformUnit {
+            .name = name,
+            .offset = last_offset
+        };
+        last_offset += getSize(type);
+    }
 
     /* For Vulkan */
     vk::DescriptorSetLayoutBinding getBinding();
     void initBuffer(vk::raii::DescriptorPool& pool, vk::raii::DescriptorSetLayout& layout);
     vk::raii::DescriptorSet& getSet() { return descSet; }
+    vk::raii::DescriptorPool& getPool() { return pool; }
+    vk::raii::DescriptorSetLayout& getSetLayout() { return setLayout; }
 
     void set(std::string name, uint value);
     void set(std::string name, int value);   

@@ -32,7 +32,7 @@ RenderComponent::RenderComponent(Mesh mesh, std::vector<resources::render::Shade
 
     builder.build();
 
-    inner = new vulkan::VulkanRenderComponentInner(std::move(builder.getPipeline()), mesh, builder.getModules(), shaders, builder.getDescriptorSetLayout(), builder.getDescriptorPool(), builder.getLayout());
+    inner = new vulkan::VulkanRenderComponentInner(std::move(builder.getPipeline()), mesh, builder.getModules(), shaders, builder.getLayout());
     utils::Locator::Instance().get<RenderSystem>()->addComponent(this);
 }
 

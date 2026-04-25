@@ -25,10 +25,6 @@ uint32_t findMemoryType(const vk::raii::PhysicalDevice& physicalDevice,
     throw std::runtime_error("Failed to find suitable memory type");
 }
 
-void VulkanRenderComponentInner::setUniforms() {
-
-}
-
 void VulkanRenderComponentInner::initBuffers() {
     int graphics = static_cast<uint32_t>(dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getQueueManager().getFamilyIndex(QueueManager::QueueType::GRAPHICS));
     vk::BufferCreateInfo vbufCI {

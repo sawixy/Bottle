@@ -1,5 +1,8 @@
+#include "core/render/vulkan/vulkanRenderSystem.hpp"
+#include "core/utils/locator.hpp"
 #include "vulkan/vulkan.hpp"
 #include <core/render/uniform.hpp>
+#include <core/render/vulkan/context.hpp>
 
 namespace bottle::core::render {
 
@@ -11,6 +14,12 @@ vk::DescriptorSetLayoutBinding Uniform::getBinding() {
         vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         nullptr
     };
+}
+
+void Uniform::initBuffer(vk::raii::DescriptorPool& pool, vk::raii::DescriptorSetLayout& layout) {
+    vulkan::Context& ctx = dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
+
+    
 }
 
 

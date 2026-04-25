@@ -1,4 +1,5 @@
 #include "core/render/vulkan/queuemanager.hpp"
+#include "core/render/vulkan/vulkanRenderSystem.hpp"
 #include "core/utils/locator.hpp"
 #include "core/window/windowSystem.hpp"
 #include "vulkan/vulkan.hpp"
@@ -10,6 +11,7 @@
 #include <core/render/vulkan/renderer.hpp>
 #include <vector>
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 #ifdef DEBUG
 #include <iostream>
@@ -288,6 +290,8 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
         std::cout << "Binding pipeline: " << *vulkanComponent->getPipeline() << std::endl;
 #endif
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, vulkanComponent->getPipeline());
+        vk::raii::DescriptorSet& set = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getUniform().getSet();
+        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vulkanComponent->getLayout(), 0, *set, nullptr);
 #ifdef DEBUG
         std::cout << "Viewport and scissor setup" << std::endl;
         std::cout << "Viewport: x=0, y=0, width=" << rect.width << ", height=" << rect.height << std::endl;

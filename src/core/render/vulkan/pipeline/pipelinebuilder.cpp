@@ -54,8 +54,6 @@ PipelineBuilder::PipelineBuilder() {
     dynamicCI.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
     dynamicCI.setPDynamicStates(dynamicStates.data());
 
-    poolCI.setMaxSets(1000);
-
     colorBlendCI.setAttachmentCount(attachments.size());
     colorBlendCI.setPAttachments(attachments.data());
     colorBlendCI.setBlendConstants(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 });
@@ -88,31 +86,10 @@ void PipelineBuilder::build() {
     vertexInputCI.setVertexAttributeDescriptionCount(static_cast<uint32_t>(vertexAttributes.size()));
     vertexInputCI.setPVertexAttributeDescriptions(vertexAttributes.data());
 
-    // TODO: Make uniform, push constants support
-    descriptorSetLayoutCI = vk::DescriptorSetLayoutCreateInfo {
-        {},
-        static_cast<uint32_t>(descriptorSetLayoutBindings.size()),
-        descriptorSetLayoutBindings.data(),
-        nullptr
-    };
-
-    descriptorSetLayout = ctx.getDevice().createDescriptorSetLayout(descriptorSetLayoutCI);
-
-    std::vector<vk::DescriptorPoolSize> poolSizes;
-    for (const auto& binding : descriptorSetLayoutBindings) {
-        vk::DescriptorPoolSize size{};
-        size.type = binding.descriptorType;
-        size.descriptorCount = binding.descriptorCount * 100;
-        poolSizes.push_back(size);
-    }
-    poolCI.setPoolSizes(poolSizes); 
-
-    pool = ctx.getDevice().createDescriptorPool(poolCI);
-
     vk::PipelineLayoutCreateInfo layoutCI {
         {},
-        1,
-        &*descriptorSetLayout,
+        0,
+        nullptr,
         0,
         nullptr
     };

@@ -48,10 +48,6 @@ private:
     vk::Format depthFormat = vk::Format::eUndefined;
 
     // Unifrom
-    vk::DescriptorPoolCreateInfo poolCI;
-    vk::raii::DescriptorPool pool{nullptr};
-    vk::raii::DescriptorSetLayout descriptorSetLayout{nullptr};
-    vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCI;
     std::vector<vk::DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 
 public:
@@ -67,7 +63,6 @@ public:
     PipelineBuilder& setPolygonMode(vk::PolygonMode polygonMode) { rasterizationCI.setPolygonMode(polygonMode); return *this; }
     PipelineBuilder& setSampleCount(vk::SampleCountFlagBits sampleCount) { multisamplingCI.setRasterizationSamples(sampleCount); return *this; }
     PipelineBuilder& addColorBlendAttachment(vk::PipelineColorBlendAttachmentState attachment) { attachments.push_back(attachment); colorBlendCI.setAttachmentCount(attachments.size()); return *this; }
-    PipelineBuilder& setPoolMaxSets(uint32_t maxSets) { poolCI.setMaxSets(maxSets); return *this; }
     PipelineBuilder& addDescriptorSetLayoutBinding(vk::DescriptorSetLayoutBinding binding) { descriptorSetLayoutBindings.push_back(binding); return *this; }
 
     void build();
@@ -75,8 +70,6 @@ public:
     vk::raii::Pipeline getPipeline() { return std::move(pipeline); }
     std::vector<vk::raii::ShaderModule> getModules() { return std::move(modules); }
     vk::raii::PipelineLayout getLayout() { return std::move(layout); }
-    vk::raii::DescriptorPool getDescriptorPool() { return std::move(pool); }
-    vk::raii::DescriptorSetLayout getDescriptorSetLayout() { return std::move(descriptorSetLayout); } 
 };
 
 }

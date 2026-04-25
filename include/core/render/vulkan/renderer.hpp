@@ -6,6 +6,7 @@
 #include <core/render/vulkan/context.hpp>
 #include <core/render/renderSystem.hpp>
 #include <vulkan/vulkan_raii.hpp>
+#include <core/render/uniform.hpp>
 
 namespace bottle::core::render::vulkan {
 
@@ -13,6 +14,7 @@ class VulkanRenderer {
 private:
     Context ctx{};
     QueueManager queueManager{ctx};
+    Uniform uniform;
 
     // TODO: Collect Swapchain to a class
     vk::raii::SwapchainKHR swapchain{nullptr};
@@ -60,6 +62,7 @@ public:
     Context& getContext() { return ctx; }
     QueueManager getQueueManager() { return queueManager; }
     vk::Format getFormat() { return format.format; }
+    Uniform& getUniform() { return uniform; }
 
     void render(std::vector<RenderComponent*>& components);
 };
