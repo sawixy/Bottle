@@ -64,14 +64,6 @@ void Uniform::initBuffer() {
     data = mem.mapMemory(0, bufferSize);
     memset(data, 0, bufferSize);
 
-    vk::DescriptorSetAllocateInfo descSetAllocI {
-        pool,
-        1,
-        &*setLayout,
-        nullptr
-    };
-    descSet = std::move(ctx.getDevice().allocateDescriptorSets(descSetAllocI)[0]);
-
     vk::DescriptorBufferInfo bufferDescInfo{
         buf,
         last_offset,
@@ -98,6 +90,14 @@ void Uniform::initBuffer() {
         nullptr
     };
     setLayout = std::move(ctx.getDevice().createDescriptorSetLayout(descSetLayoutCI));
+
+    vk::DescriptorSetAllocateInfo descSetAllocI {
+        pool,
+        1,
+        &*setLayout,
+        nullptr
+    };
+    descSet = std::move(ctx.getDevice().allocateDescriptorSets(descSetAllocI)[0]);
 }
 
 
