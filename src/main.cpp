@@ -23,10 +23,10 @@ public:
         this->addComponent(new core::render::RenderComponent(
         bottle::core::render::Mesh {
             std::vector<bottle::core::render::Vertex>{
-                core::render::Vertex{-1.0f, -1.0f, 0.0f, 1.0, 0.0, 0.0},
-                core::render::Vertex{1.0f, -1.0f, 0.0f, 1.0, 0.0, 0.0},
-                core::render::Vertex{1.0f, 1.0f, 0.0f, 0.0, 1.0, 0.0},
-                core::render::Vertex{-1.0f, 1.0f, 0.0f, 0.0, 1.0, 0.0},
+                core::render::Vertex{-0.5f, -0.5f, 0.0f, 1.0, 0.0, 0.0},
+                core::render::Vertex{0.5f, -0.5f, 0.0f, 1.0, 0.0, 0.0},
+                core::render::Vertex{0.5f, 0.5f, 0.0f, 0.0, 1.0, 0.0},
+                core::render::Vertex{-0.5f, 0.5f, 0.0f, 0.0, 1.0, 0.0},
             },
             std::vector<uint32_t>{ 0, 1, 2, 0, 2, 3}
         },
@@ -44,6 +44,7 @@ public:
 
     void update() override {
         utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform().set("time", t);
+        t += 0.001;
     }
 };
 

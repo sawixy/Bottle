@@ -1,5 +1,4 @@
 #include "core/render/renderSystem.hpp"
-#include "core/render/vulkan/queuemanager.hpp"
 #include "core/render/vulkan/vulkanRenderSystem.hpp"
 #include "vulkan/vulkan.hpp"
 #include <core/render/uniform.hpp>
@@ -11,32 +10,17 @@ namespace bottle::core::render {
 
 void Uniform::initBuffer() {
     auto& ctx = dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
-    auto& queueManager = dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getQueueManager();
-
-    vk::DescriptorPoolSize size {
-        vk::DescriptorType::eUniformBuffer,
-        1
-    };
-
-    vk::DescriptorPoolCreateInfo descPoolCI {
-        {},
-        1000,
-        1,
-        &size
-    };
-    pool = std::move(ctx.getDevice().createDescriptorPool(descPoolCI));
 
     const vk::DeviceSize bufferSize = last_offset;
 
-    uint32_t graphics = queueManager.getFamilyIndex(vulkan::QueueManager::QueueType::GRAPHICS);
-    vk::BufferCreateInfo bufferInfo{
-        {},
-        bufferSize,
-        vk::BufferUsageFlagBits::eUniformBuffer,
-        vk::SharingMode::eExclusive,
-        1,
-        &graphics
-    };
+    vk::DescriptorSetLayoutCreateInfo descSetLayoutCI {{}, 1, &binding};
+    setLayout = std::move(ctx.getDevice().createDescriptorSetLayout(descSetLayoutCI));
+
+    vk::DescriptorPoolSize poolSize {vk::DescriptorType::eUniformBuffer, 1};
+    vk::DescriptorPoolCreateInfo descPoolCI {{}, 1000, 1, &poolSize};
+    pool = std::move(ctx.getDevice().createDescriptorPool(descPoolCI));
+
+    vk::BufferCreateInfo bufferInfo {{}, bufferSize, vk::BufferUsageFlagBits::eUniformBuffer, vk::SharingMode::eExclusive};
     buf = vk::raii::Buffer(ctx.getDevice(), bufferInfo);
 
     auto memReqs = buf.getMemoryRequirements();
@@ -46,58 +30,25 @@ void Uniform::initBuffer() {
     for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
         if ((memReqs.memoryTypeBits & (1u << i)) &&
             (memProps.memoryTypes[i].propertyFlags &
-             (vk::MemoryPropertyFlagBits::eHostVisible |
-              vk::MemoryPropertyFlagBits::eHostCoherent))) {
+             (vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent))) {
             memTypeIndex = i;
             break;
         }
     }
 
-    vk::MemoryAllocateInfo allocInfo{
-        bufferSize,
-        0,
-        nullptr
-    };
+    vk::MemoryAllocateInfo allocInfo {memReqs.size, memTypeIndex};
     mem = vk::raii::DeviceMemory(ctx.getDevice(), allocInfo);
     buf.bindMemory(*mem, 0);
 
     data = mem.mapMemory(0, bufferSize);
     memset(data, 0, bufferSize);
 
-    vk::DescriptorBufferInfo bufferDescInfo{
-        buf,
-        last_offset,
-        0
-    };
-
-    vk::WriteDescriptorSet write{
-        descSet,
-        0,
-        0,
-        0,
-        vk::DescriptorType::eUniformBuffer,
-        nullptr,
-        &bufferDescInfo,
-        nullptr
-    };
-
-    ctx.getDevice().updateDescriptorSets(write, nullptr);
-
-    vk::DescriptorSetLayoutCreateInfo descSetLayoutCI {
-        {},
-        1,
-        &binding,
-        nullptr
-    };
-    setLayout = std::move(ctx.getDevice().createDescriptorSetLayout(descSetLayoutCI));
-
-    vk::DescriptorSetAllocateInfo descSetAllocI {
-        pool,
-        1,
-        &*setLayout,
-        nullptr
-    };
+    vk::DescriptorSetAllocateInfo descSetAllocI {*pool, 1, &*setLayout};
     descSet = std::move(ctx.getDevice().allocateDescriptorSets(descSetAllocI)[0]);
+
+    vk::DescriptorBufferInfo bufferDescInfo {*buf, 0, bufferSize};
+    vk::WriteDescriptorSet write {*descSet, 0, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &bufferDescInfo};
+    ctx.getDevice().updateDescriptorSets(write, nullptr);
 }
 
 
