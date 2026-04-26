@@ -24,6 +24,9 @@ public:
         }
         return std::any_cast<C&>(it->second);
     }
+
+    virtual void onStart(){}
+    virtual void update(){}
 };
 
 }

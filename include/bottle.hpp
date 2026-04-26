@@ -15,7 +15,7 @@ public:
     void init();
     void run();
 
-    void addEntity(std::string name, utils::Entity& entity) {
+    void addEntity(std::string name, utils::Entity* entity) {
         utils::Locator::Instance().add(name, entity);
     }
 

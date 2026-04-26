@@ -13,6 +13,7 @@ private:
 public:
     VulkanRenderSystem() {}
 
+    void pastInit() override { uniform.initBuffer(renderer.getContext(), renderer.getQueueManager()); }
     void addComponent(RenderComponent* comp) override;
     VulkanRenderer& getRenderer() { return renderer; };
     void update() override;

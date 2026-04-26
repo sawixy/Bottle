@@ -1,13 +1,14 @@
-#include "core/render/renderSystem.hpp"
-#include "core/render/vulkan/context.hpp"
+#include <core/render/renderSystem.hpp>
+#include <core/render/vulkan/context.hpp>
 #include "core/render/vulkan/vulkanRenderSystem.hpp"
 #include "core/resources/render/shaderResource.hpp"
 #include "core/utils/locator.hpp"
-#include "vulkan/vulkan.hpp"
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#ifdef DEBUG
 #include <iostream>
+#endif
 
 namespace bottle::core::render::vulkan {
 
@@ -38,7 +39,7 @@ PipelineBuilder::PipelineBuilder() {
     rasterizationCI.setDepthBiasConstantFactor(0.0);
     rasterizationCI.setDepthBiasSlopeFactor(0.0);
     rasterizationCI.setDepthBiasClamp(0.0);
-        
+    
     viewportCI.setViewportCount(1);
     viewportCI.setPViewports(nullptr);
     viewportCI.setScissorCount(1);
@@ -88,8 +89,8 @@ void PipelineBuilder::build() {
 
     vk::PipelineLayoutCreateInfo layoutCI {
         {},
-        0,
-        nullptr,
+        1,
+        &*utils::Locator::Instance().get<RenderSystem>()->getUniform().getSetLayout(),
         0,
         nullptr
     };
@@ -104,7 +105,9 @@ void PipelineBuilder::build() {
         nullptr
     };
 
+#ifdef DEBUG
     std::cout << "Building pipeline with " << shadersCI.size() << " shader stages, " << vertexBindings.size() << " vertex bindings, " << vertexAttributes.size() << " vertex attributes, " << attachments.size() << " color blend attachments, " << dynamicStates.size() << " dynamic states." << std::endl;
+#endif
 
     // TODO: Make inherit pipelines
     vk::GraphicsPipelineCreateInfo pipelineCI {

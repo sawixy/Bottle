@@ -13,7 +13,7 @@ namespace bottle::utils {
 class Locator : public Singleton<Locator>{
 private:
     std::unordered_map<std::type_index, System*> systems;
-    std::unordered_map<std::string, Entity> entities;
+    std::unordered_map<std::string, Entity*> entities;
 
 public:
     Locator() = default;
@@ -49,11 +49,11 @@ public:
     }
 
     /* Entity add, get, remove */
-    void add(std::string key, Entity& entity) {
+    void add(std::string key, Entity* entity) {
         entities[key] = std::move(entity);
     }
 
-    Entity& get(std::string key) {
+    Entity* get(std::string key) {
         if (entities.find(key) == entities.end())
             throw std::runtime_error("Entity not found");
 
@@ -64,8 +64,19 @@ public:
         entities.erase(key);
     }
 
+    std::unordered_map<std::type_index, System*>& getSystems() {
+        return systems;
+    }
+
+    std::unordered_map<std::string, Entity*>& getEntities() {
+        return entities;
+    }
+
     ~Locator() {
         for (auto [type, value] : systems) {
+            delete value;
+        }
+        for (auto [type, value] : entities) {
             delete value;
         }
     }

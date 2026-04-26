@@ -1,6 +1,4 @@
 #include "core/render/vulkan/queuemanager.hpp"
-#include "core/render/vulkan/vulkanRenderSystem.hpp"
-#include "core/utils/locator.hpp"
 #include "vulkan/vulkan.hpp"
 #include <core/render/uniform.hpp>
 #include <core/render/vulkan/context.hpp>
@@ -8,24 +6,23 @@
 
 namespace bottle::core::render {
 
-vk::DescriptorSetLayoutBinding Uniform::getBinding() {
-    return vk::DescriptorSetLayoutBinding {
-        0,  // Default binding
+void Uniform::initBuffer(vulkan::Context& ctx, vulkan::QueueManager& queueManager) {
+    vk::DescriptorPoolSize size {
         vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
-        nullptr
+        1
     };
-}
 
-void Uniform::initBuffer(vk::raii::DescriptorPool& pool, vk::raii::DescriptorSetLayout& layout) {
-    auto& ctx = dynamic_cast<vulkan::VulkanRenderSystem*>(
-        utils::Locator::Instance().get<RenderSystem>()
-    )->getRenderer().getContext();
+    vk::DescriptorPoolCreateInfo descPoolCI {
+        {},
+        1000,
+        1,
+        &size
+    };
+    pool = std::move(ctx.getDevice().createDescriptorPool(descPoolCI));
 
     const vk::DeviceSize bufferSize = last_offset;
 
-    uint32_t graphics = static_cast<uint32_t>(dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getQueueManager().getFamilyIndex(vulkan::QueueManager::QueueType::GRAPHICS));
+    uint32_t graphics = queueManager.getFamilyIndex(vulkan::QueueManager::QueueType::GRAPHICS);
     vk::BufferCreateInfo bufferInfo{
         {},
         bufferSize,
@@ -36,7 +33,6 @@ void Uniform::initBuffer(vk::raii::DescriptorPool& pool, vk::raii::DescriptorSet
     };
     buf = vk::raii::Buffer(ctx.getDevice(), bufferInfo);
 
-    // 2. Выбираем память (HOST_VISIBLE + HOST_COHERENT)
     auto memReqs = buf.getMemoryRequirements();
     auto memProps = ctx.getPhysicalDevice().getMemoryProperties();
 
@@ -65,7 +61,7 @@ void Uniform::initBuffer(vk::raii::DescriptorPool& pool, vk::raii::DescriptorSet
     vk::DescriptorSetAllocateInfo descSetAllocI {
         pool,
         1,
-        &*layout,
+        &*setLayout,
         nullptr
     };
     descSet = std::move(ctx.getDevice().allocateDescriptorSets(descSetAllocI)[0]);
@@ -88,6 +84,14 @@ void Uniform::initBuffer(vk::raii::DescriptorPool& pool, vk::raii::DescriptorSet
     };
 
     ctx.getDevice().updateDescriptorSets(write, nullptr);
+
+    vk::DescriptorSetLayoutCreateInfo descSetLayoutCI {
+        {},
+        1,
+        &binding,
+        nullptr
+    };
+    setLayout = std::move(ctx.getDevice().createDescriptorSetLayout(descSetLayoutCI));
 }
 
 

@@ -10,13 +10,25 @@ namespace bottle {
 void Engine::init() {
     utils::Locator::Instance().add<core::window::WindowSystem>(new core::window::glfw::GLFWWindowSystem{});
     utils::Locator::Instance().add<core::render::RenderSystem>(new core::render::vulkan::VulkanRenderSystem{});
+
+    for (auto [name, entity] : utils::Locator::Instance().getEntities()) {
+        entity->onStart();
+    }
+
+    for (auto [name, system] : utils::Locator::Instance().getSystems()) {
+        system->pastInit();
+    }
 }
 
 void Engine::run() {
     static bool running = true;
     while (running) {
-        utils::Locator::Instance().get<core::window::WindowSystem>()->update();
-        utils::Locator::Instance().get<core::render::RenderSystem>()->update();
+        for (auto [index, system] : utils::Locator::Instance().getSystems()) {
+            system->update();
+        }
+        for (auto [name, entity] : utils::Locator::Instance().getEntities()) {
+            entity->update();
+        }
     }
 }
 

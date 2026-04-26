@@ -36,7 +36,9 @@ void Context::pickPhysicalDevice(vk::raii::PhysicalDevice& physDevice) {
 #endif
     }
 
+#ifdef DEBUG 
     std::cout << "Physical device initialized" << std::endl;
+#endif
 }
 
 void Context::createLogicalDevice(vk::raii::Device& device) {

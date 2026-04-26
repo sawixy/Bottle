@@ -14,7 +14,6 @@ class VulkanRenderer {
 private:
     Context ctx{};
     QueueManager queueManager{ctx};
-    Uniform uniform;
 
     // TODO: Collect Swapchain to a class
     vk::raii::SwapchainKHR swapchain{nullptr};
@@ -60,9 +59,8 @@ public:
     void initCommandBuffers();
 
     Context& getContext() { return ctx; }
-    QueueManager getQueueManager() { return queueManager; }
+    QueueManager& getQueueManager() { return queueManager; }
     vk::Format getFormat() { return format.format; }
-    Uniform& getUniform() { return uniform; }
 
     void render(std::vector<RenderComponent*>& components);
 };

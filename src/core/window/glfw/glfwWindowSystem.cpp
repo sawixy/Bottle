@@ -4,12 +4,10 @@
 #include <core/window/glfw/glfwWindowSystem.hpp>
 #include <vulkan/vulkan.hpp>
 
-#include <iostream>
-
 namespace bottle::core::window::glfw {
 
 GLFWWindowSystem::GLFWWindowSystem() {
-    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+    //glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize GLFW");
     }
@@ -25,7 +23,6 @@ GLFWWindowSystem::GLFWWindowSystem() {
 vk::SurfaceKHR GLFWWindowSystem::vulkanInit(VkInstance instance) {
     VkSurfaceKHR _surface;
     glfwCreateWindowSurface(instance, window, nullptr, &_surface);
-    std::cout << "surface: " << _surface << std::endl;
     return vk::SurfaceKHR(_surface);
 }
 

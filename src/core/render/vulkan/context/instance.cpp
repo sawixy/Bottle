@@ -4,7 +4,9 @@
 #include <core/utils/locator.hpp>
 #include <core/window/windowSystem.hpp>
 
+#ifdef DEBUG
 #include <iostream>
+#endif
 
 namespace bottle::core::render::vulkan {
 
@@ -22,11 +24,12 @@ void Context::initInstance(vk::raii::Instance& instance) {
     for (const char* ext : InstanceExtensions) {
         requiredExtensions.push_back(ext);
     }
-
+#ifdef DEBUG
     std::cout << "Creating Vulkan instance with the following extensions:" << std::endl;
     for (const char* ext : requiredExtensions) {
         std::cout << "  " << ext << std::endl;
     }
+#endif
 
     const vk::InstanceCreateInfo instanceCI {
         {},
@@ -39,7 +42,9 @@ void Context::initInstance(vk::raii::Instance& instance) {
 
     instance = vk::raii::Instance(ctx, instanceCI);
 
+#ifdef DEBUG
     std::cout << "Instance initializated successfully" << std::endl;
+#endif
 }
 
 }

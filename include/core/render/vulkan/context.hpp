@@ -14,7 +14,6 @@ const std::vector<const char*> layers{
 
 /* Exstensions */
 const std::vector<const char*> InstanceExtensions {
-    "VK_KHR_surface"
 };
 
 const std::vector<const char*> DeviceExtensions {
