@@ -37,8 +37,6 @@ void VulkanRenderComponentInner::initBuffers() {
         nullptr
     };
 
-    std::cout << "Vertices: " << mesh.vertices.size() << ", Indices: " << mesh.indices.size() << std::endl;
-
     Context& ctx = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
     vertices = ctx.getDevice().createBuffer(vbufCI);
 
@@ -80,8 +78,6 @@ void VulkanRenderComponentInner::initBuffers() {
 
 void VulkanRenderComponentInner::loadBuffers() {
     Context& ctx = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
-
-    std::cout << "Vertices: " << mesh.vertices.size() << ", Indices: " << mesh.indices.size() << std::endl;
 
     vk::MemoryMapInfo vmemMapI {
         {},
