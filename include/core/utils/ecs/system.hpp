@@ -1,10 +1,16 @@
 #pragma once
 
+#include <vector>
+#include <functional>
+
 namespace bottle::utils {
 
 class System {
+protected:
+    std::vector<std::function<void()>> initStages;
+
 public:
-    virtual void pastInit() {};
+    std::vector<std::function<void()>> getInitStages() { return initStages; }
     virtual void update() = 0;
     virtual ~System() {}
 };

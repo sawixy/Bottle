@@ -1,12 +1,18 @@
+#include "core/render/renderSystem.hpp"
 #include "core/render/vulkan/queuemanager.hpp"
+#include "core/render/vulkan/vulkanRenderSystem.hpp"
 #include "vulkan/vulkan.hpp"
 #include <core/render/uniform.hpp>
 #include <core/render/vulkan/context.hpp>
 #include <vulkan/vulkan_raii.hpp>
+#include <core/utils/locator.hpp>
 
 namespace bottle::core::render {
 
-void Uniform::initBuffer(vulkan::Context& ctx, vulkan::QueueManager& queueManager) {
+void Uniform::initBuffer() {
+    auto& ctx = dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
+    auto& queueManager = dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getQueueManager();
+
     vk::DescriptorPoolSize size {
         vk::DescriptorType::eUniformBuffer,
         1

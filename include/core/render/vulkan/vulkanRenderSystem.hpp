@@ -11,9 +11,10 @@ private:
     std::vector<RenderComponent*> components;
 
 public:
-    VulkanRenderSystem() {}
+    VulkanRenderSystem() {
+        initStages.emplace_back([this]() {uniform.initBuffer();;});
+    }
 
-    void pastInit() override { uniform.initBuffer(renderer.getContext(), renderer.getQueueManager()); }
     void addComponent(RenderComponent* comp) override;
     VulkanRenderer& getRenderer() { return renderer; };
     void update() override;

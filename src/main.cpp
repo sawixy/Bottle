@@ -6,7 +6,6 @@
 #include <core/render/renderSystem.hpp>
 #include <bottle.hpp>
 #include <core/resources/render/shader.hpp>
-#include <iostream>
 
 using namespace bottle;
 using Entity = utils::Entity;
@@ -16,7 +15,11 @@ private:
     float t;
 
 public:
-    void onStart() override {
+    void stage0() {
+        utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform().addType("time", core::render::Uniform::UniformType::FLOAT);
+    }
+
+    void stage1() {
         this->addComponent(new core::render::RenderComponent(
         bottle::core::render::Mesh {
             std::vector<bottle::core::render::Vertex>{
@@ -32,8 +35,11 @@ public:
             (new bottle::core::resources::render::Shader("shaders/vert.vert.spv", bottle::core::resources::render::Shader::TYPE::VERTEX))->getResource()
         }
         ));
-        utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform().addType("time", core::render::Uniform::UniformType::FLOAT);
-        std::cout << "Entity on start" << std::endl;
+    }
+
+    RenderEntity() {
+        initStages.emplace_back([this]() { stage0(); });
+        initStages.emplace_back([this]() { stage1(); });
     }
 
     void update() override {

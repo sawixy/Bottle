@@ -11,12 +11,26 @@ void Engine::init() {
     utils::Locator::Instance().add<core::window::WindowSystem>(new core::window::glfw::GLFWWindowSystem{});
     utils::Locator::Instance().add<core::render::RenderSystem>(new core::render::vulkan::VulkanRenderSystem{});
 
-    for (auto [name, entity] : utils::Locator::Instance().getEntities()) {
-        entity->onStart();
-    }
+    int initStage = 0;
+    bool stagesLeft = true;
 
-    for (auto [name, system] : utils::Locator::Instance().getSystems()) {
-        system->pastInit();
+    while (stagesLeft) {
+        stagesLeft = false;
+
+        for (auto& [index, system] : utils::Locator::Instance().getSystems()) {
+            if (initStage < system->getInitStages().size()) {
+                (system->getInitStages()[initStage])();
+                stagesLeft = true;
+            }
+        }
+        for (auto& [name, entity] : utils::Locator::Instance().getEntities()) {
+            if (initStage < entity->getInitStages().size()) {
+                (entity->getInitStages()[initStage])();
+                stagesLeft = true;
+            }
+        }
+
+        initStage++;
     }
 }
 

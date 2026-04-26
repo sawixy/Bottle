@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/render/vulkan/queuemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include <string>
 #include <sys/types.h>
@@ -86,7 +85,7 @@ public:
 
     /* For Vulkan */
     vk::DescriptorSetLayoutBinding getBinding() { return binding; }
-    void initBuffer(vulkan::Context& ctx, vulkan::QueueManager& queueManager);
+    void initBuffer();
     vk::raii::DescriptorSet& getSet() { return descSet; }
     vk::raii::DescriptorPool& getPool() { return pool; }
     vk::raii::DescriptorSetLayout& getSetLayout() { return setLayout; }
