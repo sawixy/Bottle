@@ -35,6 +35,8 @@ private:
     std::vector<vk::raii::CommandBuffer> cmds;
 
 public:
+    void recreateSwapchain();
+
     VulkanRenderer() {
         queueManager.createQueues();
         initSwapchain();

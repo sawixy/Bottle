@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/utils/ecs/system.hpp>
 #include <unordered_map>
 #include <string>
 
@@ -7,13 +8,19 @@
 
 namespace bottle::core::config {
 
-class ConfigSystem : public Singleton<ConfigSystem> {
-private:
+class ConfigSystem : public utils::System {
+protected:
     std::unordered_map<std::string, std::string> config;
-public:
-    void set(const std::string& key, const std::string& value);
-    std::string get(const std::string& key) const;
 
+    void load_json(std::string filename);
+
+public:
+    ConfigSystem() = default;
+
+    void load(std::string filename);
+    void set(const std::string& key, const std::string& value) { config[key] = value; }
+    std::string& get(const std::string& key) { return config[key]; };
+    void update() override {};
 };
 
 }

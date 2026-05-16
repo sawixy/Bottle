@@ -3,6 +3,7 @@ project(Bottle)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -17,6 +18,7 @@ target_include_directories(bottle PRIVATE include)
 
 target_compile_definitions(bottle PRIVATE 
     VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
+    DEBUG=1
 )
 
 target_link_libraries(bottle 

@@ -1,7 +1,7 @@
-#include "core/render/vulkan/queuemanager.hpp"
-#include "core/utils/locator.hpp"
-#include "core/window/windowSystem.hpp"
-#include "vulkan/vulkan.hpp"
+#include <core/render/vulkan/queuemanager.hpp>
+#include <core/utils/locator.hpp>
+#include <core/window/windowSystem.hpp>
+#include <vulkan/vulkan.hpp>
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -11,6 +11,7 @@
 #include <vector>
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
 #include <vulkan/vulkan_raii.hpp>
+#include <core/config/configSystem.hpp>
 
 #ifdef DEBUG
 #include <iostream>
@@ -18,6 +19,19 @@
 #include <vulkan/vulkan_core.h>
 
 namespace bottle::core::render::vulkan {
+
+void VulkanRenderer::recreateSwapchain() {
+    ctx.getDevice().waitIdle();
+
+    // Cleanup old swapchain resources
+    cmds.clear();
+    imageViews.clear();
+    swapchain.~SwapchainKHR();
+
+    initSwapchain();
+    createImages();
+    initCommandBuffers();
+}
 
 void VulkanRenderer::initSwapchain() {
 #ifdef DEBUG
@@ -27,12 +41,20 @@ void VulkanRenderer::initSwapchain() {
     vk::SurfaceCapabilitiesKHR surfaceCaps = ctx.getPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
     std::vector<vk::SurfaceFormatKHR> formats = ctx.getPhysicalDevice().getSurfaceFormatsKHR(surface);
     std::vector<vk::PresentModeKHR> modes = ctx.getPhysicalDevice().getSurfacePresentModesKHR(surface);
-    int imageCount = 3;  // Surface requires minimum 3 images
+    uint32_t imageCount = 3;  // Surface requires minimum 3 images
     if (surfaceCaps.maxImageCount != 0) {
-        imageCount = std::clamp<uint32_t>(3, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
+        imageCount = std::clamp<uint32_t>(imageCount, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
     }
+    if (imageCount < surfaceCaps.minImageCount) {
+        imageCount = surfaceCaps.minImageCount;
+    }
+    rect = vk::Extent2D{utils::Locator::Instance().get<window::WindowSystem>()->getWidth(), utils::Locator::Instance().get<window::WindowSystem>()->getHeight()}; // TODO: Remove hardcoded numbers
 
-    rect = vk::Extent2D{800, 800}; // TODO: Remove hardcoded numbers
+#ifdef DEBUG
+    std::cout << "Surface capabilities: minImageCount=" << surfaceCaps.minImageCount
+              << ", maxImageCount=" << surfaceCaps.maxImageCount
+              << ", imageCount=" << imageCount << std::endl;
+#endif
 
     // present mode
     for (auto mode : modes) {
@@ -163,7 +185,17 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
 
     auto [res, img] = swapchain.acquireNextImage(100000000, *imageAvailableSemaphores[currentFrame], nullptr);
     if (res != vk::Result::eSuccess) {
-        throw std::runtime_error("Failed to acquire next image from swapchain");
+        if (res == vk::Result::eErrorOutOfDateKHR || res == vk::Result::eSuboptimalKHR) {
+            recreateSwapchain();
+#ifdef DEBUG
+            std::cout << "Swapchain out of date, recreated swapchain" << std::endl;
+#endif
+        } else {
+#ifdef DEBUG
+            std::cerr << "Failed to acquire next image from swapchain: " << vk::to_string(res) << std::endl;
+#endif
+            throw std::runtime_error("Failed to acquire next image from swapchain");
+        }
     }
 
     vk::RenderingAttachmentInfoKHR color {
@@ -386,11 +418,18 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
 
     vk::Result result = queueManager.getQueue(QueueManager::QueueType::TRANSFER, 0).presentKHR(presentInfo);
 #ifdef DEBUG
-    std::cout << "Present result: " << vk::to_string(res) << std::endl;
+    std::cout << "Present result: " << vk::to_string(result) << std::endl;
 #endif
 
     if (result != vk::Result::eSuccess) {
-        throw std::runtime_error("Failed to present swapchain image");
+        if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR) {
+#ifdef DEBUG
+            std::cout << "Swapchain out of date or suboptimal, recreating swapchain" << std::endl;
+#endif
+            recreateSwapchain();
+        } else {
+            throw std::runtime_error("Failed to present swapchain image");
+        }
     }
 
     currentFrame = (currentFrame + 1) % framesInFlight;

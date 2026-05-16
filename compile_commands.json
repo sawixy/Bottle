@@ -1,0 +1,92 @@
+[
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/config/configSystem.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/config/configSystem.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/config/configSystem.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/config/configSystem.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/renderComponent.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/renderComponent.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/renderComponent.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/renderComponent.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/uniform.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/uniform.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/uniform.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/uniform.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/vulkan/VulkanRenderSystem.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/VulkanRenderSystem.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/VulkanRenderSystem.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/vulkan/VulkanRenderSystem.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/vulkan/context/devices.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/context/devices.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/context/devices.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/vulkan/context/devices.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/vulkan/context/instance.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/context/instance.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/context/instance.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/vulkan/context/instance.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/vulkan/pipeline/pipelinebuilder.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/pipeline/pipelinebuilder.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/pipeline/pipelinebuilder.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/vulkan/pipeline/pipelinebuilder.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/vulkan/queuemanager.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/queuemanager.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/queuemanager.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/vulkan/queuemanager.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/vulkan/renderer.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/renderer.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/renderer.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/vulkan/renderer.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/render/vulkan/vulkanRenderComponent.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/vulkanRenderComponent.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/render/vulkan/vulkanRenderComponent.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/render/vulkan/vulkanRenderComponent.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/resources/render/vulkan/VulkanShaderResource.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/resources/render/vulkan/VulkanShaderResource.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/resources/render/vulkan/VulkanShaderResource.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/resources/render/vulkan/VulkanShaderResource.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/core/window/glfw/glfwWindowSystem.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/core/window/glfw/glfwWindowSystem.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/core/window/glfw/glfwWindowSystem.cpp",
+  "output": "CMakeFiles/bottle.dir/src/core/window/glfw/glfwWindowSystem.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/lib.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/lib.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/lib.cpp",
+  "output": "CMakeFiles/bottle.dir/src/lib.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/main.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/main.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/main.cpp",
+  "output": "CMakeFiles/bottle.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/sawixy/Projects/C++/Bottle/build",
+  "command": "/usr/bin/c++ -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1 -I/home/sawixy/Projects/C++/Bottle/include -std=gnu++17 -o CMakeFiles/bottle.dir/src/meshes.cpp.o -c /home/sawixy/Projects/C++/Bottle/src/meshes.cpp",
+  "file": "/home/sawixy/Projects/C++/Bottle/src/meshes.cpp",
+  "output": "CMakeFiles/bottle.dir/src/meshes.cpp.o"
+}
+]

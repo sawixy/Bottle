@@ -1,3 +1,5 @@
+#include "core/config/configSystem.hpp"
+#include "core/utils/locator.hpp"
 #include <stdexcept>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -13,7 +15,10 @@ GLFWWindowSystem::GLFWWindowSystem() {
     }
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); 
-    window = glfwCreateWindow(800, 800, "Bottle", nullptr, nullptr);
+    width = std::stoi(utils::Locator::Instance().get<config::ConfigSystem>()->get("window.width"));
+    height = std::stoi(utils::Locator::Instance().get<config::ConfigSystem>()->get("window.height"));
+    window = glfwCreateWindow(width, height, "Bottle", nullptr, nullptr);
+    //window = glfwCreateWindow(800, 800, "Bottle", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         throw std::runtime_error("Failed to create window");
