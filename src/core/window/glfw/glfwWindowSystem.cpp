@@ -6,6 +6,7 @@
 #include <core/window/glfw/glfwWindowSystem.hpp>
 #include <vulkan/vulkan.hpp>
 #include <bottle.hpp>
+#include <core/event/eventConfig.hpp>
 
 namespace bottle::core::window::glfw {
 
@@ -15,11 +16,13 @@ GLFWWindowSystem::GLFWWindowSystem() {
         throw std::runtime_error("Failed to initialize GLFW");
     }
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); 
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); 
     width = utils::Locator::Instance().get<config::ConfigSystem>()->get<int>("window.width");
     height = utils::Locator::Instance().get<config::ConfigSystem>()->get<int>("window.height");
     window = glfwCreateWindow(width, height, "Bottle", nullptr, nullptr);
-    //window = glfwCreateWindow(800, 800, "Bottle", nullptr, nullptr);
+    
+    utils::Locator::Instance().get<core::event::EventSystem>()->registerEvent("window_closed");
+
     if (!window) {
         glfwTerminate();
         throw std::runtime_error("Failed to create window");
@@ -36,7 +39,7 @@ void GLFWWindowSystem::update() {
     glfwPollEvents();
 
     if (glfwWindowShouldClose(window)) {
-        throw std::runtime_error("Window closed");
+        utils::Locator::Instance().get<core::event::EventSystem>()->emit("window_closed");
     }
 }
 

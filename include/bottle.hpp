@@ -23,9 +23,6 @@ public:
     T* getSystem() {
         return utils::Locator::Instance().get<T>();
     }
-
-    void quit();
-    
 };
 
 }

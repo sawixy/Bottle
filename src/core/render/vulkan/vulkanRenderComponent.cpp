@@ -7,8 +7,6 @@
 #include <vulkan/vulkan.hpp>
 #include <core/render/vulkan/vulkanRenderSystem.hpp>
 
-#include <iostream>
-
 namespace bottle::core::render::vulkan {
 
 uint32_t findMemoryType(const vk::raii::PhysicalDevice& physicalDevice, 

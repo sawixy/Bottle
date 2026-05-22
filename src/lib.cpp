@@ -8,19 +8,21 @@
 #include <core/window/glfw/glfwWindowSystem.hpp>
 #include <iostream>
 
+#include <core/event/eventConfig.hpp>
+
 namespace bottle {
-
-void Engine::quit() {
-    running = false;
-}
-
 
 void Engine::init() {
     utils::Locator::Instance().add<core::config::ConfigSystem>(new core::config::JSONConfigSystem{});
     utils::Locator::Instance().get<core::config::ConfigSystem>()->load("config.json");
 
+    utils::Locator::Instance().add<core::event::EventSystem>(new core::event::EventSystem{});
     utils::Locator::Instance().add<core::window::WindowSystem>(new core::window::glfw::GLFWWindowSystem{});
-    utils::Locator::Instance().add<core::render::RenderSystem>(new core::render::vulkan::VulkanRenderSystem{});
+    if (utils::Locator::Instance().get<core::config::ConfigSystem>()->get<std::string>("renderer.api") == "vulkan") {
+        utils::Locator::Instance().add<core::render::RenderSystem>(new core::render::vulkan::VulkanRenderSystem{});
+    } else {
+        throw std::runtime_error("Unsupported renderer API");
+    }
 
     int initStage = 0;
     bool stagesLeft = true;
@@ -47,22 +49,29 @@ void Engine::init() {
 
 void Engine::run() {
     running = true;
+
+    utils::Locator::Instance().get<core::event::EventSystem>()->subscribe("window_closed", [this]() {
+            dynamic_cast<core::render::vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<core::render::RenderSystem>())->getRenderer().getContext().getDevice().waitIdle();
+
+            for (auto& [name, entity] : utils::Locator::Instance().getEntities()) {
+                delete entity;
+            }
+
+            for (auto& [index, system] : utils::Locator::Instance().getSystems()) {
+                delete system;
+            }
+
+            running = false;
+        });
+
     while (running) {
-        try {
         for (auto [index, system] : utils::Locator::Instance().getSystems()) {
             system->update();
         }
         for (auto [name, entity] : utils::Locator::Instance().getEntities()) {
             entity->update();
         }
-        } catch (const std::exception& e) {
-            std::cerr << "Exception caught in main loop: " << e.what() << std::endl;
-            quit();
-        }
     }
-    delete utils::Locator::Instance().get<core::render::RenderSystem>();
-    delete utils::Locator::Instance().get<core::window::WindowSystem>();
-    delete utils::Locator::Instance().get<core::config::ConfigSystem>();
 }
 
 }
