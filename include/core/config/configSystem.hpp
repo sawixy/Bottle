@@ -1,25 +1,31 @@
 #pragma once
 
 #include <core/utils/ecs/system.hpp>
-#include <unordered_map>
 #include <string>
-
+#include <any>
 #include <core/utils/singleton.hpp>
 
 namespace bottle::core::config {
 
 class ConfigSystem : public utils::System {
-protected:
-    std::unordered_map<std::string, std::string> config;
-
-    void load_json(std::string filename);
-
 public:
     ConfigSystem() = default;
+    virtual ~ConfigSystem() = default;
 
-    void load(std::string filename);
-    void set(const std::string& key, const std::string& value) { config[key] = value; }
-    std::string& get(const std::string& key) { return config[key]; };
+    virtual void load(const std::string& filename) = 0;
+    virtual std::any getAny(const std::string& key) = 0;
+    virtual void setAny(const std::string& key, const std::any& value) = 0;
+    
+    template<typename T>
+    T get(const std::string& key) {
+        return std::any_cast<T>(getAny(key));
+    }
+    
+    template<typename T>
+    void set(const std::string& key, const T& value) {
+        setAny(key, std::any(value));
+    }
+    
     void update() override {};
 };
 

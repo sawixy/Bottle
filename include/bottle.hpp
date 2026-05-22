@@ -9,7 +9,7 @@ namespace bottle {
 
 class Engine {
 private:
-    bool running = false;
+    bool running;
 
 public:
     void init();
@@ -23,6 +23,8 @@ public:
     T* getSystem() {
         return utils::Locator::Instance().get<T>();
     }
+
+    void quit();
     
 };
 

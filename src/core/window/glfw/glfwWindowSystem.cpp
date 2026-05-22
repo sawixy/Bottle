@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <core/window/glfw/glfwWindowSystem.hpp>
 #include <vulkan/vulkan.hpp>
+#include <bottle.hpp>
 
 namespace bottle::core::window::glfw {
 
@@ -15,8 +16,8 @@ GLFWWindowSystem::GLFWWindowSystem() {
     }
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); 
-    width = std::stoi(utils::Locator::Instance().get<config::ConfigSystem>()->get("window.width"));
-    height = std::stoi(utils::Locator::Instance().get<config::ConfigSystem>()->get("window.height"));
+    width = utils::Locator::Instance().get<config::ConfigSystem>()->get<int>("window.width");
+    height = utils::Locator::Instance().get<config::ConfigSystem>()->get<int>("window.height");
     window = glfwCreateWindow(width, height, "Bottle", nullptr, nullptr);
     //window = glfwCreateWindow(800, 800, "Bottle", nullptr, nullptr);
     if (!window) {
@@ -33,6 +34,10 @@ vk::SurfaceKHR GLFWWindowSystem::vulkanInit(VkInstance instance) {
 
 void GLFWWindowSystem::update() {
     glfwPollEvents();
+
+    if (glfwWindowShouldClose(window)) {
+        throw std::runtime_error("Window closed");
+    }
 }
 
 GLFWWindowSystem::~GLFWWindowSystem() {
