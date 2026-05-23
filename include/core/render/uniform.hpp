@@ -97,6 +97,10 @@ public:
     void set(std::string name, glm::vec3 value);
     void set(std::string name, glm::mat3 value);
     void set(std::string name, glm::mat4 value);
+
+    ~Uniform() {
+        delete[] static_cast<char*>(data);
+    }
 };
 
 }

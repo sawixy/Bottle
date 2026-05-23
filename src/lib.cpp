@@ -50,13 +50,14 @@ void Engine::init() {
 void Engine::run() {
     running = true;
 
+    // TODO: Make destruction stages
     utils::Locator::Instance().get<core::event::EventSystem>()->subscribe("window_closed", [this]() {
-            dynamic_cast<core::render::vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<core::render::RenderSystem>())->getRenderer().getContext().getDevice().waitIdle();
-
+            if (utils::Locator::Instance().get<core::config::ConfigSystem>()->get<std::string>("renderer.api") == "vulkan") {
+                dynamic_cast<core::render::vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<core::render::RenderSystem>())->getRenderer().getContext().getDevice().waitIdle();
+            }
             for (auto& [name, entity] : utils::Locator::Instance().getEntities()) {
                 delete entity;
             }
-
             for (auto& [index, system] : utils::Locator::Instance().getSystems()) {
                 delete system;
             }

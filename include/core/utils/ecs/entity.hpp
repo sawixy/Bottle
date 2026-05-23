@@ -6,12 +6,13 @@
 #include <stdexcept>
 #include <vector>
 #include <functional>
+#include <memory>
 
 namespace bottle::utils {
 
 class Entity {
 private:
-    std::unordered_map<std::type_index, std::any> components;
+    std::unordered_map<std::type_index, std::unique_ptr<std::any>> components;
 
 protected:
     std::vector<std::function<void()>> initStages;
@@ -19,7 +20,7 @@ protected:
 public:
     std::vector<std::function<void()>> getInitStages() { return initStages; }
     void addComponent(std::any component) {
-        components[std::type_index(component.type())] = std::move(component);
+        components[std::type_index(component.type())] = std::make_unique<std::any>(std::move(component));
     }
 
     template<typename C>
@@ -28,7 +29,7 @@ public:
         if (it == components.end()) {
             throw std::runtime_error("Component not found");
         }
-        return std::any_cast<C&>(it->second);
+        return std::any_cast<C&>(*(it->second));
     }
     virtual void update(){}
 };

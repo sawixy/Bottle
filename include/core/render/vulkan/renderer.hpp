@@ -16,10 +16,11 @@ private:
     QueueManager queueManager{ctx};
 
     // TODO: Collect Swapchain to a class
+    vk::raii::SurfaceKHR surface{nullptr};
+
     vk::raii::SwapchainKHR swapchain{nullptr};
     std::vector<vk::Image> images;
     std::vector<vk::raii::ImageView> imageViews;
-    vk::SurfaceKHR surface;
 
     vk::PresentModeKHR presentMode;
     vk::Extent2D rect;

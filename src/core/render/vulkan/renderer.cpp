@@ -26,7 +26,7 @@ void VulkanRenderer::recreateSwapchain() {
     // Cleanup old swapchain resources
     cmds.clear();
     imageViews.clear();
-    swapchain.~SwapchainKHR();
+    swapchain = nullptr;
 
     initSwapchain();
     createImages();
@@ -37,7 +37,7 @@ void VulkanRenderer::initSwapchain() {
 #ifdef DEBUG
     std::cout << "Swapchain initialization started" << std::endl;
 #endif
-    surface = utils::Locator::Instance().get<window::WindowSystem>()->vulkanInit(*ctx.getInstance());
+    surface = vk::raii::SurfaceKHR(ctx.getInstance(), utils::Locator::Instance().get<window::WindowSystem>()->vulkanInit(*ctx.getInstance()));
     vk::SurfaceCapabilitiesKHR surfaceCaps = ctx.getPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
     std::vector<vk::SurfaceFormatKHR> formats = ctx.getPhysicalDevice().getSurfaceFormatsKHR(surface);
     std::vector<vk::PresentModeKHR> modes = ctx.getPhysicalDevice().getSurfacePresentModesKHR(surface);
@@ -190,6 +190,7 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
 #ifdef DEBUG
             std::cout << "Swapchain out of date, recreated swapchain" << std::endl;
 #endif
+            return;
         } else {
 #ifdef DEBUG
             std::cerr << "Failed to acquire next image from swapchain: " << vk::to_string(res) << std::endl;
@@ -401,7 +402,7 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
         1,
         &*cmd,
         1,
-        &*renderFinishedSemaphores[img],
+        &*renderFinishedSemaphores[currentFrame],
         nullptr
     };
     
@@ -409,7 +410,7 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
 
     vk::PresentInfoKHR presentInfo {
         1,
-        &*renderFinishedSemaphores[img],
+        &*renderFinishedSemaphores[currentFrame],
         1,
         &*swapchain,
         &img,

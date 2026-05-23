@@ -52,6 +52,10 @@ public:
     RenderComponentInner* getInner() { return inner; }
 
     void setMesh(Mesh newMesh) { inner->setMesh(std::move(newMesh)); }
+
+    ~RenderComponent() {
+        delete inner;
+    }
 };    
 
 }

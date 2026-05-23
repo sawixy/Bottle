@@ -4,11 +4,13 @@
 #include <vulkan/vulkan.hpp>
 #include <core/render/renderComponent.hpp>
 
+#include <iostream>
+
 namespace bottle::core::render::vulkan {
 
 class VulkanRenderComponentInner : public RenderComponentInner {
 private:
-    vk::raii::Pipeline pipeline;
+    vk::raii::Pipeline pipeline{nullptr};
     vk::raii::Buffer vertices{nullptr};
     vk::raii::DeviceMemory verticesMemory{nullptr};
     vk::raii::Buffer indices{nullptr};
@@ -34,6 +36,10 @@ public:
     vk::raii::Buffer& getVertexBuffer() { return vertices; }
     vk::raii::Buffer& getIndexBuffer() { return indices; }
     vk::raii::PipelineLayout& getLayout() { return layout; }
+
+    ~VulkanRenderComponentInner() {
+        std::cout << "Destroying VulkanRenderComponentInner" << std::endl;
+    }
 };
 
 }
