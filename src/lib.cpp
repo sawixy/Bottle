@@ -8,7 +8,7 @@
 #include <core/window/glfw/glfwWindowSystem.hpp>
 #include <iostream>
 
-#include <core/event/eventConfig.hpp>
+#include <core/event/eventSystem.hpp>
 
 namespace bottle {
 
