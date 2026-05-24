@@ -4,6 +4,10 @@
 #include <variant>
 #include <vulkan/vulkan_raii.hpp>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 namespace bottle::core::resources::render {
 
 struct ShaderCode {
@@ -40,6 +44,12 @@ public:
     const std::string& getPath() const { return path; }
     ShaderType getType() const { return type; }
     const std::string& getName() const { return name; }
+
+    virtual ~ShaderResource() {
+#ifdef DEBUG
+        std::cout << "Destroying ShaderResource: " << name << std::endl;
+#endif
+    }
 };
 
 }

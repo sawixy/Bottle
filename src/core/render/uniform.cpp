@@ -17,7 +17,7 @@ void Uniform::initBuffer() {
     setLayout = std::move(ctx.getDevice().createDescriptorSetLayout(descSetLayoutCI));
 
     vk::DescriptorPoolSize poolSize {vk::DescriptorType::eUniformBuffer, 1};
-    vk::DescriptorPoolCreateInfo descPoolCI {{}, 1000, 1, &poolSize};
+    vk::DescriptorPoolCreateInfo descPoolCI {vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, 1000, 1, &poolSize};
     pool = std::move(ctx.getDevice().createDescriptorPool(descPoolCI));
 
     vk::BufferCreateInfo bufferInfo {{}, bufferSize, vk::BufferUsageFlagBits::eUniformBuffer, vk::SharingMode::eExclusive};

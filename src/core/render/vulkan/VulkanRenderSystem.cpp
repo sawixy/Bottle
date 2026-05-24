@@ -6,6 +6,10 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #include <core/resources/render/vulkan/VulkanShaderResource.hpp>
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 namespace bottle::core::render::vulkan {
 
 static bool initVulkanDispatcher = []() {
@@ -15,7 +19,11 @@ static bool initVulkanDispatcher = []() {
     return true;
 }();
 
-VulkanRenderSystem::~VulkanRenderSystem() {};
+VulkanRenderSystem::~VulkanRenderSystem() {
+#ifdef DEBUG
+    std::cout << "Destroying VulkanRenderSystem" << std::endl;
+#endif
+};
 
 void VulkanRenderSystem::addComponent(RenderComponent* comp) {
     components.push_back(comp);

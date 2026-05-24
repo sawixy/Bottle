@@ -177,20 +177,20 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
 
     static uint32_t currentFrame = 0;
 
-    if (ctx.getDevice().waitForFences(*fences[currentFrame], vk::True, 432857092384570) != vk::Result::eSuccess) {
+    if (ctx.getDevice().waitForFences(*fences[currentFrame], vk::True, 10000000000) != vk::Result::eSuccess) {
         throw std::runtime_error("Failed to wait for fences");
     }
 
     ctx.getDevice().resetFences(*fences[currentFrame]);
 
-    auto [res, img] = swapchain.acquireNextImage(100000000, *imageAvailableSemaphores[currentFrame], nullptr);
+    auto [res, img] = swapchain.acquireNextImage(1000000000, *imageAvailableSemaphores[currentFrame], nullptr);
     if (res != vk::Result::eSuccess) {
         if (res == vk::Result::eErrorOutOfDateKHR || res == vk::Result::eSuboptimalKHR) {
+            ctx.getDevice().resetFences(*fences[currentFrame]);
             recreateSwapchain();
 #ifdef DEBUG
             std::cout << "Swapchain out of date, recreated swapchain" << std::endl;
 #endif
-            return;
         } else {
 #ifdef DEBUG
             std::cerr << "Failed to acquire next image from swapchain: " << vk::to_string(res) << std::endl;
@@ -417,7 +417,7 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
         nullptr
     };
 
-    vk::Result result = queueManager.getQueue(QueueManager::QueueType::TRANSFER, 0).presentKHR(presentInfo);
+    vk::Result result = queueManager.getQueue(QueueManager::QueueType::GRAPHICS, 0).presentKHR(presentInfo);
 #ifdef DEBUG
     std::cout << "Present result: " << vk::to_string(result) << std::endl;
 #endif

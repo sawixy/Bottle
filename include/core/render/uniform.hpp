@@ -11,11 +11,15 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <core/render/vulkan/context.hpp>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 namespace bottle::core::render {
 
 struct UniformUnit {
     std::string name;
-    uint offset;      // For Vulkan
+    uint offset;
 };
 
 class Uniform {
@@ -32,23 +36,21 @@ public:
     };
 
 private:
-    /* For Vulkan */
     uint last_offset = 0;
     void* data;
-    vk::raii::Buffer buf{nullptr};
-    vk::raii::DeviceMemory mem{nullptr};
-    vk::raii::DescriptorSet descSet{nullptr};
-    vk::raii::DescriptorSetLayout setLayout{nullptr};
-    vk::raii::DescriptorPool pool{nullptr};
+    std::unordered_map<std::string, UniformUnit> map;
     vk::DescriptorSetLayoutBinding binding {
-        0,  // Default binding
+        0,
         vk::DescriptorType::eUniformBuffer,
         1,
         vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         nullptr
     };
-
-    std::unordered_map<std::string, UniformUnit> map;
+    vk::raii::DeviceMemory mem{nullptr};
+    vk::raii::DescriptorPool pool{nullptr};
+    vk::raii::DescriptorSet descSet{nullptr};
+    vk::raii::DescriptorSetLayout setLayout{nullptr};
+    vk::raii::Buffer buf{nullptr};
 
     static size_t getSize(UniformType type) {
         switch (type) {
@@ -83,7 +85,6 @@ public:
         last_offset += getSize(type);
     }
 
-    /* For Vulkan */
     vk::DescriptorSetLayoutBinding getBinding() { return binding; }
     void initBuffer();
     vk::raii::DescriptorSet& getSet() { return descSet; }
@@ -99,7 +100,9 @@ public:
     void set(std::string name, glm::mat4 value);
 
     ~Uniform() {
-        delete[] static_cast<char*>(data);
+#ifdef DEBUG
+        std::cout << "Destroying Uniform" << std::endl;
+#endif
     }
 };
 

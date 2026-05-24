@@ -10,15 +10,12 @@
 namespace bottle::core::render {
 
 class RenderSystem: public utils::System {
-protected:
-    Uniform uniform;
-
 public:
     virtual void addComponent(RenderComponent* comp) = 0;
     virtual void update() override = 0;
     virtual ~RenderSystem() override = default;
 
-    Uniform& getUniform() { return uniform; }
+    virtual Uniform& getUniform() = 0;
 };
 
 }

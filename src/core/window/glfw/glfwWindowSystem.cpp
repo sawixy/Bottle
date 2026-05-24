@@ -6,7 +6,7 @@
 #include <core/window/glfw/glfwWindowSystem.hpp>
 #include <vulkan/vulkan.hpp>
 #include <bottle.hpp>
-#include <core/event/eventConfig.hpp>
+#include <core/event/eventSystem.hpp>
 
 namespace bottle::core::window::glfw {
 
@@ -40,6 +40,7 @@ void GLFWWindowSystem::update() {
 
     if (glfwWindowShouldClose(window)) {
         utils::Locator::Instance().get<core::event::EventSystem>()->emit("window_closed");
+        return;
     }
 }
 

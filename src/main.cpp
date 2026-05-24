@@ -9,12 +9,12 @@
 #include <core/resources/render/shader.hpp>
 
 using namespace bottle;
-using Entity = utils::Entity;
+using Entity = core::utils::Entity;
 
 class RenderEntity : public Entity {
 public:
     void stage0() {
-        auto& uniform = utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform();
+        auto& uniform = core::utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform();
         
         uniform.addType("model", core::render::Uniform::UniformType::MAT4);
         uniform.addType("view", core::render::Uniform::UniformType::MAT4);
@@ -22,7 +22,7 @@ public:
     }
 
     void stage1() {
-        this->addComponent(new core::render::RenderComponent(
+        std::unique_ptr<core::render::RenderComponent> renderComponent = std::make_unique<core::render::RenderComponent>(
             bottle::core::render::Mesh {
                 std::vector<bottle::core::render::Vertex>{
                     core::render::Vertex{-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f},
@@ -45,10 +45,12 @@ public:
                 }
             },
             std::vector<bottle::core::resources::render::ShaderResource*>{
-                (new bottle::core::resources::render::Shader("shaders/frag.frag.spv", bottle::core::resources::render::Shader::TYPE::FRAGMENT))->getResource(),
-                (new bottle::core::resources::render::Shader("shaders/vert.vert.spv", bottle::core::resources::render::Shader::TYPE::VERTEX))->getResource()
+                bottle::core::resources::render::Shader("shaders/frag.frag.spv", bottle::core::resources::render::Shader::TYPE::FRAGMENT).getResource(),
+                bottle::core::resources::render::Shader("shaders/vert.vert.spv", bottle::core::resources::render::Shader::TYPE::VERTEX).getResource()
             }
-        ));
+        );
+
+        this->addComponent(std::move(renderComponent));
     }
 
     RenderEntity() {
@@ -57,7 +59,7 @@ public:
     }
 
     void update() override {
-        auto& uniform = utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform();
+        auto& uniform = core::utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform();
     }
 };
 
@@ -65,7 +67,7 @@ int main() {
     Engine bottle;
 
     RenderEntity* entity = new RenderEntity{};
-    bottle.addEntity("entity", entity);
+    bottle.addEntity("test", entity);
 
     bottle.init();
     bottle.run();

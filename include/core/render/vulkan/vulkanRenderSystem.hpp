@@ -8,6 +8,7 @@ namespace bottle::core::render::vulkan {
 class VulkanRenderSystem : public RenderSystem {
 private:
     VulkanRenderer renderer;
+    Uniform uniform;
     std::vector<RenderComponent*> components;
 
 public:
@@ -19,6 +20,8 @@ public:
     void addComponent(RenderComponent* comp) override;
     VulkanRenderer& getRenderer() { return renderer; };
     void update() override;
+
+    Uniform& getUniform() override { return uniform; }
 
     ~VulkanRenderSystem() override;
 };

@@ -18,6 +18,7 @@ target_include_directories(bottle PRIVATE include)
 
 target_compile_definitions(bottle PRIVATE 
     VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
+    DEBUG=1
 )
 
 target_link_libraries(bottle 

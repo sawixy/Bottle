@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 
-namespace bottle::utils {
+namespace bottle::core::utils {
 
 class System {
 protected:

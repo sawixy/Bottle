@@ -15,13 +15,13 @@ public:
     void init();
     void run();
 
-    void addEntity(std::string name, utils::Entity* entity) {
-        utils::Locator::Instance().add(name, entity);
+    void addEntity(std::string name, core::utils::Entity* entity) {
+        core::utils::Locator::Instance().add(name, entity);
     }
 
     template<typename T>
     T* getSystem() {
-        return utils::Locator::Instance().get<T>();
+        return core::utils::Locator::Instance().get<T>();
     }
 };
 

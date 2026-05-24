@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <string>
 
-namespace bottle::utils {
+namespace bottle::core::utils {
 
 class Locator : public Singleton<Locator>{
 private:
@@ -64,22 +64,15 @@ public:
         entities.erase(key);
     }
 
-    std::unordered_map<std::type_index, System*>& getSystems() {
+    std::unordered_map<std::type_index, core::utils::System*>& getSystems() {
         return systems;
     }
 
-    std::unordered_map<std::string, Entity*>& getEntities() {
+    std::unordered_map<std::string, core::utils::Entity*>& getEntities() {
         return entities;
     }
 
-    ~Locator() {
-        for (auto [type, value] : systems) {
-            delete value;
-        }
-        for (auto [type, value] : entities) {
-            delete value;
-        }
-    }
+    ~Locator() {}
 };
 
 }

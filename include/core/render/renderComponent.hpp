@@ -1,10 +1,15 @@
 #pragma once 
 
+#include "core/utils/ecs/component.hpp"
 #include <core/utils/locator.hpp>
 #include <core/resources/render/shaderResource.hpp>
 #include <core/utils/ecs/system.hpp>
 #include <vector>
 #include <stdint.h>
+
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 namespace bottle::core::render {
     
@@ -40,7 +45,7 @@ public:
     }
 };
 
-class RenderComponent {
+class RenderComponent : public utils::Component {
 private:
     RenderComponentInner* inner;
 
@@ -54,6 +59,9 @@ public:
     void setMesh(Mesh newMesh) { inner->setMesh(std::move(newMesh)); }
 
     ~RenderComponent() {
+#ifdef DEBUG
+        std::cout << "Destroying RenderComponent" << std::endl;
+#endif
         delete inner;
     }
 };    
