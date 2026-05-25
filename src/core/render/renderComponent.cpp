@@ -7,11 +7,10 @@
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
 #include <core/config/configSystem.hpp>
-#include <algorithm>
 
 namespace bottle::core::render {
 
-RenderComponent::RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::vector<std::pair<std::string, size_t>> uniforms) {
+RenderComponent::RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::unordered_map<std::string, Uniform::UniformType> uniforms) {
     if (utils::Locator::Instance().get<core::config::ConfigSystem>()->get<std::string>("renderer.api") == "vulkan") {
         vulkan::PipelineBuilder builder;
         for (resources::render::ShaderResource* shader : shaders) {
@@ -23,9 +22,8 @@ RenderComponent::RenderComponent(Mesh mesh, std::vector<resources::render::Shade
             .addVertexAttribute(1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, r))
             .addColorFormat(dynamic_cast<vulkan::VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getFormat())
             .setDepthFormat(vk::Format::eD32Sfloat);
-        builder.build();
 
-        inner = new vulkan::VulkanRenderComponentInner(std::move(builder.getPipeline()), mesh, builder.getModules(), shaders, builder.getLayout());
+        inner = new vulkan::VulkanRenderComponentInner(mesh, builder, shaders, std::move(uniforms));
         utils::Locator::Instance().get<RenderSystem>()->addComponent(this);
     } else {
         throw std::runtime_error("Unsupported renderer API");

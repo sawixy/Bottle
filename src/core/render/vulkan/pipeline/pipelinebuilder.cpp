@@ -87,10 +87,22 @@ void PipelineBuilder::build() {
     vertexInputCI.setVertexAttributeDescriptionCount(static_cast<uint32_t>(vertexAttributes.size()));
     vertexInputCI.setPVertexAttributeDescriptions(vertexAttributes.data());
 
+    if (descriptorSetLayouts.empty() && !descriptorSetLayoutBindings.empty()) {
+        vk::DescriptorSetLayoutCreateInfo descriptorLayoutCI {
+            {},
+            static_cast<uint32_t>(descriptorSetLayoutBindings.size()),
+            descriptorSetLayoutBindings.data()
+        };
+        descriptorSetLayouts.emplace_back(ctx.getDevice(), descriptorLayoutCI);
+    }
+
+    const vk::DescriptorSetLayout* pSetLayouts = descriptorSetLayouts.empty() ? nullptr : &**descriptorSetLayouts.data();
+    uint32_t setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+
     vk::PipelineLayoutCreateInfo layoutCI {
         {},
-        1,
-        &*utils::Locator::Instance().get<RenderSystem>()->getUniform().getSetLayout(),
+        setLayoutCount,
+        pSetLayouts,
         0,
         nullptr
     };

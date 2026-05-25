@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/render/vulkan/buffer.hpp"
 #include "vulkan/vulkan.hpp"
 #include <string>
 #include <sys/types.h>
@@ -46,11 +47,10 @@ private:
         vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         nullptr
     };
-    vk::raii::DeviceMemory mem{nullptr};
+    std::unique_ptr<vulkan::Buffer> buf;
     vk::raii::DescriptorPool pool{nullptr};
     vk::raii::DescriptorSet descSet{nullptr};
     vk::raii::DescriptorSetLayout setLayout{nullptr};
-    vk::raii::Buffer buf{nullptr};
 
     static size_t getSize(UniformType type) {
         switch (type) {

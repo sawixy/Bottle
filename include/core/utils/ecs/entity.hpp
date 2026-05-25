@@ -12,26 +12,32 @@ namespace bottle::core::utils {
 
 class Entity {
 private:
-    std::unordered_map<std::type_index, std::unique_ptr<Component>> components;
+    std::unordered_map<std::type_index, Component*> components;
 
 protected:
     std::vector<std::function<void()>> initStages;
 
 public:
     std::vector<std::function<void()>> getInitStages() { return initStages; }
-    void addComponent(std::unique_ptr<Component> component) {
+    void addComponent(Component* component) {
         components[std::type_index(typeid(*component))] = std::move(component);
     }
 
     template<typename C>
-    std::unique_ptr<C> getComponent() {
+    C* getComponent() {
         auto it = components.find(std::type_index(typeid(C)));
         if (it == components.end()) {
             throw std::runtime_error("Component not found");
         }
-        return it->second;
+        return dynamic_cast<C*>(it->second);
     }
     virtual void update(){}
+
+    ~Entity() {
+        for (auto& [type, component] : components) {
+            delete component;
+        }
+    }
 };
 
 }

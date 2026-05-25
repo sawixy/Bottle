@@ -1,5 +1,6 @@
 #include "core/render/renderComponent.hpp"
 #include "core/render/uniform.hpp"
+#include "core/utils/ecs/component.hpp"
 #include "core/utils/ecs/entity.hpp"
 #include "core/utils/locator.hpp"
 #include <glm/ext/matrix_float4x4.hpp>
@@ -14,15 +15,10 @@ using Entity = core::utils::Entity;
 class RenderEntity : public Entity {
 public:
     void stage0() {
-        auto& uniform = core::utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform();
-        
-        uniform.addType("model", core::render::Uniform::UniformType::MAT4);
-        uniform.addType("view", core::render::Uniform::UniformType::MAT4);
-        uniform.addType("projection", core::render::Uniform::UniformType::MAT4);
     }
 
     void stage1() {
-        std::unique_ptr<core::render::RenderComponent> renderComponent = std::make_unique<core::render::RenderComponent>(
+        core::render::RenderComponent* renderComponent = new core::render::RenderComponent(
             bottle::core::render::Mesh {
                 std::vector<bottle::core::render::Vertex>{
                     core::render::Vertex{-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f},
@@ -47,10 +43,13 @@ public:
             std::vector<bottle::core::resources::render::ShaderResource*>{
                 bottle::core::resources::render::Shader("shaders/frag.frag.spv", bottle::core::resources::render::Shader::TYPE::FRAGMENT).getResource(),
                 bottle::core::resources::render::Shader("shaders/vert.vert.spv", bottle::core::resources::render::Shader::TYPE::VERTEX).getResource()
-            }
+            },
+            std::unordered_map<std::string, core::render::Uniform::UniformType>{
+                {"color", core::render::Uniform::UniformType::VEC3}
+             }
         );
 
-        this->addComponent(std::move(renderComponent));
+        this->addComponent(renderComponent);
     }
 
     RenderEntity() {
@@ -59,7 +58,7 @@ public:
     }
 
     void update() override {
-        auto& uniform = core::utils::Locator::Instance().get<core::render::RenderSystem>()->getUniform();
+        this->getComponent<core::render::RenderComponent>()->getUniform().set("color", glm::vec3(1.0f, 0.0f, 0.0f));
     }
 };
 

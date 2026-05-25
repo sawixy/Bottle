@@ -49,6 +49,7 @@ private:
 
     // Unifrom
     std::vector<vk::DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+    std::vector<vk::raii::DescriptorSetLayout> descriptorSetLayouts;
 
 public:
     PipelineBuilder();
@@ -64,6 +65,7 @@ public:
     PipelineBuilder& setSampleCount(vk::SampleCountFlagBits sampleCount) { multisamplingCI.setRasterizationSamples(sampleCount); return *this; }
     PipelineBuilder& addColorBlendAttachment(vk::PipelineColorBlendAttachmentState attachment) { attachments.push_back(attachment); colorBlendCI.setAttachmentCount(attachments.size()); return *this; }
     PipelineBuilder& addDescriptorSetLayoutBinding(vk::DescriptorSetLayoutBinding binding) { descriptorSetLayoutBindings.push_back(binding); return *this; }
+    PipelineBuilder& addDescriptorSetLayout(vk::raii::DescriptorSetLayout layout) { descriptorSetLayouts.push_back(std::move(layout)); return *this; }
 
     void build();
     

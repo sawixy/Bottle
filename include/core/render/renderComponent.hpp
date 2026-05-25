@@ -6,6 +6,7 @@
 #include <core/utils/ecs/system.hpp>
 #include <vector>
 #include <stdint.h>
+#include <core/render/uniform.hpp>
 
 #ifdef DEBUG
 #include <iostream>
@@ -31,12 +32,13 @@ protected:
     std::vector<resources::render::ShaderResource*> shaders;
 
 public:
-    RenderComponentInner(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders) : mesh(mesh), shaders(std::move(shaders)) {}
+    RenderComponentInner(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::unordered_map<std::string, Uniform::UniformType> uniforms = {}) : mesh(mesh), shaders(std::move(shaders)) {}
 
     Mesh& getMesh() { return mesh; }
     std::vector<resources::render::ShaderResource*>& getShaders() { return shaders; }
 
     virtual void setMesh(Mesh newMesh) { mesh = newMesh; }
+    virtual Uniform& getUniform() = 0;
 
     virtual ~RenderComponentInner() {
         for (resources::render::ShaderResource* shader : shaders) {
@@ -50,11 +52,13 @@ private:
     RenderComponentInner* inner;
 
 public:
-    RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::vector<std::pair<std::string, size_t>> uniforms = {});
+    RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::unordered_map<std::string, Uniform::UniformType> uniforms = {});
 
     Mesh& getMesh() { return inner->getMesh(); }
     std::vector<resources::render::ShaderResource*>& getShaders() { return inner->getShaders(); }
     RenderComponentInner* getInner() { return inner; }
+
+    Uniform& getUniform() { return inner->getUniform(); }
 
     void setMesh(Mesh newMesh) { inner->setMesh(std::move(newMesh)); }
 

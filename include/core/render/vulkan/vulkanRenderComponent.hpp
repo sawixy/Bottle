@@ -3,8 +3,12 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan.hpp>
 #include <core/render/renderComponent.hpp>
+#include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
+#include <core/render/uniform.hpp>
 
+#ifdef DEBUG
 #include <iostream>
+#endif
 
 namespace bottle::core::render::vulkan {
 
@@ -18,12 +22,21 @@ private:
     std::vector<vk::raii::ShaderModule> shaderModules;
     vk::raii::PipelineLayout layout{nullptr};
 
+    Uniform uniform;
+
     void loadBuffers();
     void initBuffers();
 
 public:
-    VulkanRenderComponentInner(vk::raii::Pipeline pipeline, Mesh mesh, std::vector<vk::raii::ShaderModule> shaders, std::vector<resources::render::ShaderResource*> shaderResources, vk::raii::PipelineLayout layout)
-        : RenderComponentInner(mesh, shaderResources), pipeline(std::move(pipeline)), shaderModules(std::move(shaders)), layout(std::move(layout)) {
+    VulkanRenderComponentInner(Mesh mesh, PipelineBuilder& builder, std::vector<resources::render::ShaderResource*> shaderResources, std::unordered_map<std::string, Uniform::UniformType> uniforms = {})
+        : RenderComponentInner(mesh, shaderResources), uniform(std::move(uniforms)) {
+        uniform.initBuffer();
+        builder.addDescriptorSetLayoutBinding(uniform.getBinding());
+        builder.addDescriptorSetLayout(std::move(uniform.getSetLayout()));
+        builder.build();
+        pipeline = std::move(builder.getPipeline());
+        shaderModules = std::move(builder.getModules());
+        layout = std::move(builder.getLayout());
         initBuffers();
         loadBuffers();
     }
@@ -37,8 +50,12 @@ public:
     vk::raii::Buffer& getIndexBuffer() { return indices; }
     vk::raii::PipelineLayout& getLayout() { return layout; }
 
+    Uniform& getUniform() override { return uniform; }
+
     ~VulkanRenderComponentInner() {
+#ifdef DEBUG
         std::cout << "Destroying VulkanRenderComponentInner" << std::endl;
+#endif
     }
 };
 

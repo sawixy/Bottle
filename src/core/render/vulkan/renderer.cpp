@@ -322,7 +322,7 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
         std::cout << "Binding pipeline: " << *vulkanComponent->getPipeline() << std::endl;
 #endif
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, vulkanComponent->getPipeline());
-        vk::raii::DescriptorSet& set = utils::Locator::Instance().get<RenderSystem>()->getUniform().getSet();
+        vk::raii::DescriptorSet& set = vulkanComponent->getUniform().getSet();
         cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vulkanComponent->getLayout(), 0, *set, nullptr);
 #ifdef DEBUG
         std::cout << "Viewport and scissor setup" << std::endl;
