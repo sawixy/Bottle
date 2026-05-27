@@ -58,7 +58,9 @@ public:
     }
 
     void update() override {
-        this->getComponent<core::render::RenderComponent>()->getUniform().set("color", glm::vec3(1.0f, 0.0f, 0.0f));
+        static float time;
+        this->getComponent<core::render::RenderComponent>()->getUniform().set("color", glm::vec3(sin(time), cos(time), sin(cos(time))));
+        time += 0.001;
     }
 };
 
