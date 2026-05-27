@@ -1,9 +1,13 @@
 #include "core/render/renderComponent.hpp"
 #include "core/render/uniform.hpp"
+#include "core/transform.hpp"
 #include "core/utils/ecs/component.hpp"
 #include "core/utils/ecs/entity.hpp"
 #include "core/utils/locator.hpp"
+#include <core/transform.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <meshes.hpp>
 #include <core/render/renderSystem.hpp>
 #include <bottle.hpp>
@@ -45,11 +49,16 @@ public:
                 bottle::core::resources::render::Shader("shaders/vert.vert.spv", bottle::core::resources::render::Shader::TYPE::VERTEX).getResource()
             },
             std::unordered_map<std::string, core::render::Uniform::UniformType>{
-                {"color", core::render::Uniform::UniformType::VEC3}
+                {"model", core::render::Uniform::UniformType::MAT4},
+                {"view", core::render::Uniform::UniformType::MAT4},
+                {"proj", core::render::Uniform::UniformType::MAT4}
              }
         );
 
+        core::transform::TransformComponent* transformComponent = new core::transform::TransformComponent(glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
         this->addComponent(renderComponent);
+        this->addComponent(transformComponent);
     }
 
     RenderEntity() {
@@ -58,9 +67,9 @@ public:
     }
 
     void update() override {
-        static float time;
-        this->getComponent<core::render::RenderComponent>()->getUniform().set("color", glm::vec3(sin(time), cos(time), sin(cos(time))));
-        time += 0.001;
+        this->getComponent<core::render::RenderComponent>()->getUniform().set("model", this->getComponent<core::transform::TransformComponent>()->getModelMatrix());
+        this->getComponent<core::render::RenderComponent>()->getUniform().set("view", glm::lookAt(glm::vec3(0.0, 0.0, -2.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)));
+        this->getComponent<core::render::RenderComponent>()->getUniform().set("proj", glm::perspective(glm::radians(70.0f), 800.0f / 600.0f, 0.1f, 100.0f));
     }
 };
 

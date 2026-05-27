@@ -1,3 +1,4 @@
+#include "vulkan/vulkan.hpp"
 #include <core/render/vulkan/queuemanager.hpp>
 #include <core/utils/locator.hpp>
 #include <core/window/windowSystem.hpp>
@@ -12,6 +13,8 @@
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
 #include <vulkan/vulkan_raii.hpp>
 #include <core/config/configSystem.hpp>
+#include <algorithm>
+#include <core/render/vulkan/vulkanRenderSystem.hpp>
 
 #ifdef DEBUG
 #include <iostream>
@@ -27,10 +30,82 @@ void VulkanRenderer::recreateSwapchain() {
     cmds.clear();
     imageViews.clear();
     swapchain = nullptr;
+    depthMemory = nullptr;
+    depthView = nullptr;
+    depthImage = nullptr;
 
     initSwapchain();
     createImages();
     initCommandBuffers();
+    createDepthBuffer();
+}
+
+// Depth buffer creation written by AI actually...
+bool hasStencilComponent(vk::Format format) {
+    return format == vk::Format::eD32SfloatS8Uint ||
+           format == vk::Format::eD24UnormS8Uint;
+}
+
+uint32_t findMemoryType(vk::raii::PhysicalDevice physicalDevice, uint32_t typeFilter, vk::MemoryPropertyFlags properties) {
+    auto memProperties = physicalDevice.getMemoryProperties();
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("Failed to find suitable memory type!");
+}
+
+void VulkanRenderer::createDepthBuffer() {
+    vk::Format depthFormat = vk::Format::eD32Sfloat;
+    
+    vk::ImageCreateInfo imageCI{
+        {},
+        vk::ImageType::e2D,
+        depthFormat,
+        vk::Extent3D{rect.width, rect.height, 1},
+        1,  // mip levels
+        1,  // array layers
+        vk::SampleCountFlagBits::e1,
+        vk::ImageTiling::eOptimal,
+        vk::ImageUsageFlagBits::eDepthStencilAttachment,
+        vk::SharingMode::eExclusive,
+        0,
+        nullptr,
+        vk::ImageLayout::eUndefined
+    };
+    
+    depthImage = vk::raii::Image(ctx.getDevice(), imageCI);
+
+    auto memReqs = depthImage.getMemoryRequirements();
+    vk::MemoryAllocateInfo allocInfo{
+        memReqs.size,
+        findMemoryType(ctx.getPhysicalDevice(), memReqs.memoryTypeBits, 
+            vk::MemoryPropertyFlagBits::eDeviceLocal)
+    };
+    
+    depthMemory = vk::raii::DeviceMemory(ctx.getDevice(), allocInfo);
+    depthImage.bindMemory(*depthMemory, 0);
+    
+    vk::ImageViewCreateInfo viewCI{
+        {},
+        *depthImage,
+        vk::ImageViewType::e2D,
+        depthFormat,
+        {},
+        vk::ImageSubresourceRange{
+            vk::ImageAspectFlagBits::eDepth,
+            0, 1, 0, 1
+        }
+    };
+    
+    if (hasStencilComponent(depthFormat)) {
+        viewCI.subresourceRange.aspectMask |= vk::ImageAspectFlagBits::eStencil;
+    }
+    
+    depthView = vk::raii::ImageView(ctx.getDevice(), viewCI);
 }
 
 void VulkanRenderer::initSwapchain() {
@@ -212,14 +287,14 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
     };
 
     vk::RenderingAttachmentInfoKHR depth {
-        imageViews[img],
+        depthView,
         vk::ImageLayout::eDepthAttachmentOptimal,
         vk::ResolveModeFlagBitsKHR::eNone,
-        {},
+        nullptr,
         vk::ImageLayout::eUndefined,
         vk::AttachmentLoadOp::eClear,
-        vk::AttachmentStoreOp::eDontCare,
-        vk::ClearValue(std::array<float, 4>{1.0f, 0.0f, 0.0f, 1.0f}),
+        vk::AttachmentStoreOp::eStore,
+        vk::ClearDepthStencilValue{1.0f, 0},
         nullptr
     };
 
@@ -242,7 +317,7 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
         0,
         1,
         &color,
-        nullptr,
+        &depth,
         nullptr,
         nullptr
     };

@@ -1,11 +1,12 @@
 #pragma once
 
+#include "core/utils/ecs/component.hpp"
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 namespace bottle::core::transform {
 
-class TransformComponent {
+class TransformComponent : public utils::Component {
 private:
     glm::vec3 position;
     glm::quat rotation;

@@ -18,6 +18,10 @@ private:
     // TODO: Collect Swapchain to a class
     vk::raii::SurfaceKHR surface{nullptr};
 
+    vk::raii::DeviceMemory depthMemory{nullptr};
+    vk::raii::ImageView depthView{nullptr};
+    vk::raii::Image depthImage{nullptr};
+
     vk::raii::SwapchainKHR swapchain{nullptr};
     std::vector<vk::Image> images;
     std::vector<vk::raii::ImageView> imageViews;
@@ -36,6 +40,7 @@ private:
     std::vector<vk::raii::CommandBuffer> cmds;
 
 public:
+    void createDepthBuffer();
     void recreateSwapchain();
 
     VulkanRenderer() {
@@ -44,6 +49,7 @@ public:
         createImages();
         framesInFlight = images.size();  // Match the actual number of swapchain images
         initCommandBuffers();
+        createDepthBuffer();
 
         // Create semaphores for each frame
         for (uint32_t i = 0; i < framesInFlight; i++) {

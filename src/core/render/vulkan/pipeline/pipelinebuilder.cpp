@@ -3,6 +3,7 @@
 #include "core/render/vulkan/vulkanRenderSystem.hpp"
 #include "core/resources/render/shaderResource.hpp"
 #include "core/utils/locator.hpp"
+#include "vulkan/vulkan.hpp"
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
@@ -22,15 +23,16 @@ PipelineBuilder::PipelineBuilder() {
     inputAssemblyCI.setTopology(vk::PrimitiveTopology::eTriangleList);
     inputAssemblyCI.setPrimitiveRestartEnable(vk::False);
         
-    depthStencilCI.setDepthTestEnable(vk::False);
+    depthStencilCI.setDepthTestEnable(vk::True);
     depthStencilCI.setDepthBoundsTestEnable(vk::False);
     depthStencilCI.setStencilTestEnable(vk::False);
     depthStencilCI.setDepthWriteEnable(vk::True);
     depthStencilCI.setMinDepthBounds(0.0);
     depthStencilCI.setMaxDepthBounds(1.0);
+    depthStencilCI.setDepthCompareOp(vk::CompareOp::eLess);
 
     rasterizationCI.setDepthBiasEnable(vk::False);
-    rasterizationCI.setDepthClampEnable(vk::False);
+    rasterizationCI.setDepthClampEnable(vk::True);
     rasterizationCI.setRasterizerDiscardEnable(vk::False);
     rasterizationCI.setPolygonMode(vk::PolygonMode::eFill);
     rasterizationCI.setLineWidth(1.0);

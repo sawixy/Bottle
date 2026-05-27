@@ -14,7 +14,7 @@ private:
 
 public:
     VulkanRenderSystem() {
-        initStages.emplace_back([this]() {});
+        initStages.emplace_back([this]() { });
     }
 
     void addComponent(RenderComponent* comp) override;
