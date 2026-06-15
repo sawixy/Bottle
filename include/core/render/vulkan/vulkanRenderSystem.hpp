@@ -10,7 +10,7 @@ class VulkanRenderSystem : public RenderSystem {
 private:
     VulkanRenderer renderer;
     std::vector<RenderComponent*> components;
-    Uniform uniform;
+    std::vector<Uniform> uniforms;
 
 public:
     VulkanRenderSystem() {
@@ -20,7 +20,7 @@ public:
     void addComponent(RenderComponent* comp) override;
     VulkanRenderer& getRenderer() { return renderer; };
     void update() override;
-    Uniform& getUniform() override { return uniform; }
+    Uniform& getUniform(int binding) override { return uniforms[binding]; }
 
     ~VulkanRenderSystem() override;
 };

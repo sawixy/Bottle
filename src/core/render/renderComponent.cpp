@@ -10,7 +10,7 @@
 
 namespace bottle::core::render {
 
-RenderComponent::RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::unordered_map<std::string, Uniform::UniformType> uniforms) {
+RenderComponent::RenderComponent(Mesh mesh, std::vector<resources::render::ShaderResource*> shaders, std::vector<std::unordered_map<std::string, Uniform::UniformType>> uniforms) {
     if (utils::Locator::Instance().get<core::config::ConfigSystem>()->get<std::string>("renderer.api") == "vulkan") {
         vulkan::PipelineBuilder builder;
         for (resources::render::ShaderResource* shader : shaders) {

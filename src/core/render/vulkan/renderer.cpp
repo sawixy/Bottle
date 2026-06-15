@@ -397,8 +397,10 @@ void VulkanRenderer::render(std::vector<RenderComponent*>& components) {
         std::cout << "Binding pipeline: " << *vulkanComponent->getPipeline() << std::endl;
 #endif
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, vulkanComponent->getPipeline());
-        vk::raii::DescriptorSet& set = vulkanComponent->getUniform().getSet();
-        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vulkanComponent->getLayout(), 0, *set, nullptr);
+        for (int i = 0; i < 0; i++) {
+            vk::raii::DescriptorSet& set = vulkanComponent->getUniform(i).getSet();
+            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vulkanComponent->getLayout(), 0, *set, nullptr);
+        }
 #ifdef DEBUG
         std::cout << "Viewport and scissor setup" << std::endl;
         std::cout << "Viewport: x=0, y=0, width=" << rect.width << ", height=" << rect.height << std::endl;

@@ -5,6 +5,7 @@
 #include <core/render/renderComponent.hpp>
 #include <core/render/vulkan/pipeline/pipelinebuilder.hpp>
 #include <core/render/uniform.hpp>
+#include <core/render/vulkan/buffer.hpp>
 
 #ifdef DEBUG
 #include <iostream>
@@ -15,24 +16,25 @@ namespace bottle::core::render::vulkan {
 class VulkanRenderComponentInner : public RenderComponentInner {
 private:
     vk::raii::Pipeline pipeline{nullptr};
-    vk::raii::Buffer vertices{nullptr};
-    vk::raii::DeviceMemory verticesMemory{nullptr};
-    vk::raii::Buffer indices{nullptr};
-    vk::raii::DeviceMemory indicesMemory{nullptr};
+    Buffer* vertices;
+    Buffer* indices;
     std::vector<vk::raii::ShaderModule> shaderModules;
     vk::raii::PipelineLayout layout{nullptr};
 
-    Uniform uniform;
+    std::vector<Uniform> uniforms;
 
     void loadBuffers();
     void initBuffers();
 
 public:
-    VulkanRenderComponentInner(Mesh mesh, PipelineBuilder& builder, std::vector<resources::render::ShaderResource*> shaderResources, std::unordered_map<std::string, Uniform::UniformType> uniforms = {})
-        : RenderComponentInner(mesh, shaderResources), uniform(std::move(uniforms)) {
-        uniform.initBuffer();
-        builder.addDescriptorSetLayoutBinding(uniform.getBinding());
-        builder.addDescriptorSetLayout(std::move(uniform.getSetLayout()));
+    VulkanRenderComponentInner(Mesh mesh, PipelineBuilder& builder, std::vector<resources::render::ShaderResource*> shaderResources, std::vector<std::unordered_map<std::string, Uniform::UniformType>> uniforms = {})
+        : RenderComponentInner(mesh, shaderResources) {
+        for (auto uniform_type : uniforms) {
+            this->uniforms.emplace_back(uniform_type);
+            this->uniforms.back().initBuffer();
+            builder.addDescriptorSetLayoutBinding(this->uniforms.back().getBinding());
+            builder.addDescriptorSetLayout(std::move(this->uniforms.back().getSetLayout()));
+        }
         builder.build();
         pipeline = std::move(builder.getPipeline());
         shaderModules = std::move(builder.getModules());
@@ -46,11 +48,11 @@ public:
         loadBuffers();
     }
     vk::raii::Pipeline& getPipeline() { return pipeline; }
-    vk::raii::Buffer& getVertexBuffer() { return vertices; }
-    vk::raii::Buffer& getIndexBuffer() { return indices; }
+    vk::raii::Buffer& getVertexBuffer() { return vertices->getBuffer(); }
+    vk::raii::Buffer& getIndexBuffer() { return indices->getBuffer(); }
     vk::raii::PipelineLayout& getLayout() { return layout; }
 
-    Uniform& getUniform() override { return uniform; }
+    Uniform& getUniform(int binding) override { return uniforms[binding]; }
 
     ~VulkanRenderComponentInner() {
 #ifdef DEBUG

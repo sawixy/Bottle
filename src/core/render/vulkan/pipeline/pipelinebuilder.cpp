@@ -27,9 +27,9 @@ PipelineBuilder::PipelineBuilder() {
     depthStencilCI.setDepthBoundsTestEnable(vk::False);
     depthStencilCI.setStencilTestEnable(vk::False);
     depthStencilCI.setDepthWriteEnable(vk::True);
-    depthStencilCI.setMinDepthBounds(0.0);
+    depthStencilCI.setMinDepthBounds(-1.0);
     depthStencilCI.setMaxDepthBounds(1.0);
-    depthStencilCI.setDepthCompareOp(vk::CompareOp::eLess);
+    depthStencilCI.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
 
     rasterizationCI.setDepthBiasEnable(vk::False);
     rasterizationCI.setDepthClampEnable(vk::True);

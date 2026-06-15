@@ -15,7 +15,7 @@ public:
     virtual void update() override = 0;
     virtual ~RenderSystem() override = default;
 
-    virtual Uniform& getUniform() = 0;
+    virtual Uniform& getUniform(int binding) = 0;
 };
 
 }

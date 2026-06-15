@@ -1,6 +1,5 @@
 #include <core/render/renderSystem.hpp>
 #include <core/utils/locator.hpp>
-#include "core/render/vulkan/queuemanager.hpp"
 #include "vulkan/vulkan.hpp"
 #include <core/render/vulkan/vulkanRenderComponent.hpp>
 #include <cstring>
@@ -24,93 +23,17 @@ uint32_t findMemoryType(const vk::raii::PhysicalDevice& physicalDevice,
 }
 
 void VulkanRenderComponentInner::initBuffers() {
-    int graphics = static_cast<uint32_t>(dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getQueueManager().getFamilyIndex(QueueManager::QueueType::GRAPHICS));
-    vk::BufferCreateInfo vbufCI {
-        {},
-        mesh.vertices.size() * sizeof(Vertex),
-        vk::BufferUsageFlagBits::eVertexBuffer,
-        vk::SharingMode::eExclusive,
-        1,
-        reinterpret_cast<uint32_t*>(&graphics),
-        nullptr
-    };
-
-    Context& ctx = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
-    vertices = ctx.getDevice().createBuffer(vbufCI);
-
-    vk::BufferCreateInfo ibufCI {
-        {},
-        mesh.indices.size() * sizeof(uint32_t),
-        vk::BufferUsageFlagBits::eIndexBuffer,
-        vk::SharingMode::eExclusive,
-        1,
-        reinterpret_cast<uint32_t*>(&graphics),
-        nullptr
-    };
-
-    indices = ctx.getDevice().createBuffer(ibufCI);
-
-    // allocating memory
-    vk::MemoryRequirements vmemreq = vertices.getMemoryRequirements();
-    vk::MemoryRequirements imemreq = indices.getMemoryRequirements();
-
-    uint32_t vmemory_type = findMemoryType(ctx.getPhysicalDevice(), vmemreq.memoryTypeBits,  vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-    uint32_t imemory_type = findMemoryType(ctx.getPhysicalDevice(), imemreq.memoryTypeBits,  vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-
-    vk::MemoryAllocateInfo vallocI {
-        vmemreq.size,
-        vmemory_type,
-        nullptr
-    };
-    verticesMemory = ctx.getDevice().allocateMemory(vallocI);
-    vertices.bindMemory(*verticesMemory, 0);
-
-    vk::MemoryAllocateInfo iallocI {
-        imemreq.size,
-        imemory_type,
-        nullptr
-    };
-    indicesMemory = ctx.getDevice().allocateMemory(iallocI);
-    indices.bindMemory(*indicesMemory, 0);
+    indices = new Buffer(mesh.indices.size() * sizeof(Vertex), vk::BufferUsageFlagBits::eVertexBuffer);
+    vertices = new Buffer(mesh.vertices.size() * sizeof(uint32_t), vk::BufferUsageFlagBits::eIndexBuffer);
 }
 
 void VulkanRenderComponentInner::loadBuffers() {
     Context& ctx = dynamic_cast<VulkanRenderSystem*>(utils::Locator::Instance().get<RenderSystem>())->getRenderer().getContext();
 
-    vk::MemoryMapInfo vmemMapI {
-        {},
-        verticesMemory,
-        {},
-        mesh.vertices.size() * sizeof(Vertex),
-        nullptr
-    };
-
-    void* vdata = ctx.getDevice().mapMemory2(vmemMapI);
-    memcpy(vdata, mesh.vertices.data(), mesh.vertices.size()*sizeof(Vertex));
-    vk::MemoryUnmapInfo vmemUnmapI {
-        {},
-        verticesMemory,
-        nullptr
-    };
-    ctx.getDevice().unmapMemory2(vmemUnmapI);
-
-    vk::MemoryMapInfo imemMapI {
-        {},
-        indicesMemory,
-        {},
-        mesh.indices.size() * sizeof(uint32_t),
-        nullptr
-    };
-
-    void* idata = ctx.getDevice().mapMemory2(imemMapI);
+    void* vdata = vertices->getMappedMemory();
+    memcpy(vdata, mesh.vertices.data(), mesh.vertices.size()*sizeof(uint32_t));
+    void* idata = indices->getMappedMemory();
     memcpy(idata, mesh.indices.data(), mesh.indices.size()*sizeof(uint32_t));
-
-    vk::MemoryUnmapInfo imemUnmapI {
-        {},
-        indicesMemory,
-        nullptr
-    };
-    ctx.getDevice().unmapMemory2(imemUnmapI);
 }
 
 }

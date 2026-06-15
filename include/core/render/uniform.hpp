@@ -1,7 +1,6 @@
 #pragma once
 
-#include "core/render/vulkan/buffer.hpp"
-#include "vulkan/vulkan.hpp"
+#include <core/render/vulkan/buffer.hpp>
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
@@ -47,7 +46,7 @@ private:
         vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         nullptr
     };
-    std::unique_ptr<vulkan::Buffer> buf;
+    vulkan::Buffer* buf;
     vk::raii::DescriptorPool pool{nullptr};
     vk::raii::DescriptorSet descSet{nullptr};
     vk::raii::DescriptorSetLayout setLayout{nullptr};
@@ -100,6 +99,7 @@ public:
     void set(std::string name, glm::mat4 value);
 
     ~Uniform() {
+        delete buf;
 #ifdef DEBUG
         std::cout << "Destroying Uniform" << std::endl;
 #endif

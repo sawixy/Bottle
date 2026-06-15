@@ -32,7 +32,7 @@ void Uniform::initBuffer() {
     pool = vk::raii::DescriptorPool(ctx.getDevice(), poolCI);
 
     if (last_offset != 0) {
-        buf = std::make_unique<vulkan::Buffer>(last_offset, vk::BufferUsageFlagBits::eUniformBuffer);
+        buf = new vulkan::Buffer(last_offset, vk::BufferUsageFlagBits::eUniformBuffer);
 
         data = buf->getMappedMemory();
         memset(data, 0, last_offset);
